@@ -1,0 +1,3 @@
+rootProject.name = "MXKeyValue"
+include ':app'
+include ':LibKeyValue'

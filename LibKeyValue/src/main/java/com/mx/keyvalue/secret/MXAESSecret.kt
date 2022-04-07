@@ -6,6 +6,7 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import kotlin.random.Random
 
 /**
  * AES对称加密
@@ -32,10 +33,10 @@ open class MXAESSecret(
             init(Cipher.DECRYPT_MODE, keySpec, IvParameterSpec(ivParameter.toByteArray()))
         }
     }
-
-
+    
     override fun generalSecret(): String {
-        return UUID.randomUUID().toString()
+        val length = Random.nextInt(15, 30)
+        return UUID.randomUUID().toString().substring(0, length)
     }
 
     override fun encrypt(key: String, value: String?, salt: String): String? {

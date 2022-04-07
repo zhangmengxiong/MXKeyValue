@@ -1,6 +1,7 @@
 package com.mx.keyvalue
 
 import android.content.Context
+import com.mx.keyvalue.base.IMXKeyValue
 import com.mx.keyvalue.db.MXDBKeyValue
 import com.mx.keyvalue.secret.IMXSecret
 import com.mx.keyvalue.secret.MXNoSecret
@@ -10,7 +11,8 @@ class MXKeyValue(
     name: String,
     secret: IMXSecret = MXNoSecret()
 ) {
-    private val dbKeyValue = MXDBKeyValue(context.applicationContext, name.trim(), secret)
+    private val dbKeyValue: IMXKeyValue =
+        MXDBKeyValue(context.applicationContext, name.trim(), secret)
 
     /**
      * 从SharedPreferences拷贝数据

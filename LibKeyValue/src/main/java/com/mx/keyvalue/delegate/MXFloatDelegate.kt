@@ -12,7 +12,7 @@ class MXFloatDelegate(
         return mxKeyValue.get(name)?.toFloatOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Float?) {
-        mxKeyValue.set(name, value?.toString())
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Float) {
+        mxKeyValue.set(name, value.toString())
     }
 }

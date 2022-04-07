@@ -12,7 +12,7 @@ class MXDoubleDelegate(
         return mxKeyValue.get(name)?.toDoubleOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Double?) {
-        mxKeyValue.set(name, value?.toString())
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
+        mxKeyValue.set(name, value.toString())
     }
 }

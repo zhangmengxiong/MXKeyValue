@@ -12,7 +12,7 @@ class MXLongDelegate(
         return mxKeyValue.get(name)?.toLongOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Long?) {
-        mxKeyValue.set(name, value?.toString())
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Long) {
+        mxKeyValue.set(name, value.toString())
     }
 }

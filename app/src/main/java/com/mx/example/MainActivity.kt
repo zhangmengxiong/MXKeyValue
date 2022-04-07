@@ -3,9 +3,11 @@ package com.mx.example
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.keyvalue.MXKeyValue
+import com.mx.keyvalue.delegate.MXStringDelegate
 import com.mx.keyvalue.secret.MXDESSecret
 import java.lang.StringBuilder
 import kotlin.concurrent.thread
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

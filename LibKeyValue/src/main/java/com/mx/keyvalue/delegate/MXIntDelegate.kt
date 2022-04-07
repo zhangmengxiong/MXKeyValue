@@ -12,7 +12,7 @@ class MXIntDelegate(
         return mxKeyValue.get(name)?.toIntOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Int?) {
-        mxKeyValue.set(name, value?.toString())
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
+        mxKeyValue.set(name, value.toString())
     }
 }

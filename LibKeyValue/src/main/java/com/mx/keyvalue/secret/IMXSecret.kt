@@ -4,7 +4,7 @@ interface IMXSecret {
     /**
      * 生成随机密码
      */
-    fun generalSecret(): String
+    fun generalSalt(): String
 
     /**
      * 对Value加密

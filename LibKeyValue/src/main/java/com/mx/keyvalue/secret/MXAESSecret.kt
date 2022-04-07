@@ -33,7 +33,7 @@ open class MXAESSecret(
         }
     }
 
-    override fun generalSecret(): String {
+    override fun generalSalt(): String {
         val length = Random.nextInt(15, 30)
         return UUID.randomUUID().toString().substring(0, length)
     }

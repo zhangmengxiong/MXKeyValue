@@ -58,13 +58,13 @@ internal class MXDBKeyValue(
         synchronized(lock) {
             try {
                 val database = openHelper.writableDatabase
-                val secret = mxSecret.generalSecret()
-                val value_encrypt = mxSecret.encrypt(key, value, secret)
+                val salt = mxSecret.generalSalt()
+                val value_encrypt = mxSecret.encrypt(key, value, salt)
 
                 val values = ContentValues()
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_NAME, key)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_VALUE, value_encrypt)
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, secret)
+                values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, salt)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
                 return database.replace(dbName, null, values) >= 0
             } catch (e: Exception) {

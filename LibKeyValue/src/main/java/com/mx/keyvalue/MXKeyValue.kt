@@ -40,6 +40,10 @@ class MXKeyValue(
         return dbKeyValue.get(key) ?: default
     }
 
+    fun getAll(): Map<String, String> {
+        return dbKeyValue.getAll()
+    }
+
     /**
      * 清理数据
      */

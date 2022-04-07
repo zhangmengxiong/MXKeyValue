@@ -11,10 +11,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mxKeyValue = MXKeyValue(
+        val KV = MXKeyValue(
             application, "mx_kv_test",
             MXAESSecret("34987xckj1230sdj", "821321235z3xcsdd")
         )
+        KV.cleanAll()
 
         var spend = 0L
         val time = 20
@@ -22,8 +23,8 @@ class MainActivity : AppCompatActivity() {
             val key = generalString(12)
             val value = generalString(1280)
             val start = System.currentTimeMillis()
-            mxKeyValue.set(key, value)
-            val read_value = mxKeyValue.get(key)
+            KV.set(key, value)
+            val read_value = KV.get(key)
             if (read_value != value) {
                 println("错误：$key -> $value -> $read_value")
             } else {
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
             spend += (System.currentTimeMillis() - start)
         }
         println("平均耗时：${spend / time.toFloat()} ms")
+
+        println(KV.getAll().entries.joinToString(",") { "${it.key}, ${it.value}" })
     }
 
     private fun generalString(size: Int): String {

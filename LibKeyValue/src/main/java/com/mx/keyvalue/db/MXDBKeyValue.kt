@@ -17,20 +17,26 @@ internal class MXDBKeyValue(
     override fun get(key: String): String? {
         synchronized(lock) {
             val database = openHelper.readableDatabase
-            var value: String? = null
-            var secret: String? = null
             var cursor: Cursor? = null
             try {
                 cursor = database.query(
                     dbName,
-                    arrayOf(MXKVSQLiteOpenHelper.DB_KEY_VALUE, MXKVSQLiteOpenHelper.DB_KEY_SECRET),
-                    "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?", arrayOf(key), null, null, null
+                    arrayOf(
+                        MXKVSQLiteOpenHelper.DB_KEY_NAME,
+                        MXKVSQLiteOpenHelper.DB_KEY_VALUE,
+                        MXKVSQLiteOpenHelper.DB_KEY_SALT
+                    ),
+                    "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
+                    arrayOf(key),
+                    null,
+                    null,
+                    null
                 )
                 if (cursor != null && cursor.moveToFirst()) {
-                    value =
-                        cursor.getString(cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_VALUE))
-                    secret =
-                        cursor.getString(cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_SECRET))
+                    val pair = cursorToEntry(cursor)
+                    if (pair != null) {
+                        return pair.second
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -44,12 +50,8 @@ internal class MXDBKeyValue(
                 } catch (e: Exception) {
                 }
             }
-            if (secret != null && value != null) {
-                value = mxSecret.decryptValue(key, value, secret)
-            }
-
-            return value
         }
+        return null
     }
 
     override fun set(key: String, value: String?): Boolean {
@@ -57,12 +59,12 @@ internal class MXDBKeyValue(
             try {
                 val database = openHelper.writableDatabase
                 val secret = mxSecret.generalSecret()
-                val value_encrypt = mxSecret.encryptValue(key, value, secret)
+                val value_encrypt = mxSecret.encrypt(key, value, secret)
 
                 val values = ContentValues()
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_NAME, key)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_VALUE, value_encrypt)
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_SECRET, secret)
+                values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, secret)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
                 return database.replace(dbName, null, values) >= 0
             } catch (e: Exception) {
@@ -70,6 +72,42 @@ internal class MXDBKeyValue(
             }
         }
         return false
+    }
+
+    override fun getAll(): Map<String, String> {
+        synchronized(lock) {
+            val database = openHelper.readableDatabase
+            val result = HashMap<String, String>()
+            var cursor: Cursor? = null
+            try {
+                cursor = database.query(
+                    dbName,
+                    arrayOf(
+                        MXKVSQLiteOpenHelper.DB_KEY_NAME,
+                        MXKVSQLiteOpenHelper.DB_KEY_VALUE,
+                        MXKVSQLiteOpenHelper.DB_KEY_SALT
+                    ), null, null, null, null, null
+                )
+                while (cursor.moveToNext()) {
+                    val pair = cursorToEntry(cursor)
+                    if (pair != null) {
+                        result[pair.first] = pair.second
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    cursor?.close()
+                } catch (e: Exception) {
+                }
+                try {
+                    database.close()
+                } catch (e: Exception) {
+                }
+            }
+            return result
+        }
     }
 
     override fun cleanAll(): Boolean {
@@ -82,5 +120,24 @@ internal class MXDBKeyValue(
             }
         }
         return false
+    }
+
+    private fun cursorToEntry(cursor: Cursor): Pair<String, String>? {
+        try {
+            val key = cursor.getString(
+                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_NAME)
+            )
+            var value = cursor.getString(
+                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_VALUE)
+            )
+            val salt = cursor.getString(
+                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_SALT)
+            )
+            value = mxSecret.decrypt(key, value, salt)
+            return Pair(key, value)
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 }

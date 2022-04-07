@@ -8,19 +8,11 @@ open class MXNoSecret : IMXSecret {
         return ""
     }
 
-    override fun encryptKey(key: String, secret: String): String {
-        return key
-    }
-
-    override fun decryptKey(secretKey: String, secret: String): String {
-        return secretKey
-    }
-
-    override fun encryptValue(key: String, value: String?, secret: String): String? {
+    override fun encrypt(key: String, value: String?, salt: String): String? {
         return value
     }
 
-    override fun decryptValue(key: String, secretValue: String?, secret: String): String? {
+    override fun decrypt(key: String, secretValue: String?, salt: String): String? {
         return secretValue
     }
 }

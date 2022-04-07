@@ -16,10 +16,12 @@ class MainActivity : AppCompatActivity() {
 
         val mxKeyValue = MXKeyValue(application, "mx_kv_test", MXDESSecret("uyrii809"))
 
-        val start = System.currentTimeMillis()
-        repeat(20) {
+        var spend = 0L
+        val time = 2000
+        repeat(time) {
             val key = generalString(12)
-            val value = generalString(128)
+            val value = generalString(1280)
+            val start = System.currentTimeMillis()
             mxKeyValue.set(key, value)
             val read_value = mxKeyValue.get(key)
             if (read_value != value) {
@@ -27,9 +29,9 @@ class MainActivity : AppCompatActivity() {
             } else {
 //                    println("正确：$key -> $value")
             }
+            spend += (System.currentTimeMillis() - start)
         }
-        val diff = (System.currentTimeMillis() - start) / 1000f
-        println("耗时：$diff 秒")
+        println("平均耗时：${spend / time.toFloat()} ms")
     }
 
     private fun generalString(size: Int): String {

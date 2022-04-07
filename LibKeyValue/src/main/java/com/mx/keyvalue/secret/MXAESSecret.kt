@@ -1,7 +1,6 @@
 package com.mx.keyvalue.secret
 
 import android.util.Base64
-import java.lang.Exception
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -33,7 +32,7 @@ open class MXAESSecret(
             init(Cipher.DECRYPT_MODE, keySpec, IvParameterSpec(ivParameter.toByteArray()))
         }
     }
-    
+
     override fun generalSecret(): String {
         val length = Random.nextInt(15, 30)
         return UUID.randomUUID().toString().substring(0, length)

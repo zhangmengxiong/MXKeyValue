@@ -1,4 +1,4 @@
-package com.mx.keyvalue
+package com.mx.keyvalue.base
 
 internal interface IMXKeyValue {
     fun get(key: String): String?

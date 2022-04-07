@@ -3,7 +3,7 @@ package com.mx.keyvalue.db
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import com.mx.keyvalue.IMXKeyValue
+import com.mx.keyvalue.base.IMXKeyValue
 import com.mx.keyvalue.secret.IMXSecret
 
 internal class MXDBKeyValue(

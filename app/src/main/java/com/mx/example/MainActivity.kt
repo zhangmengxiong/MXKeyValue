@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val mxKeyValue = MXKeyValue(application, "mx_kv_test", MXDESSecret("uyrii809"))
-        mxKeyValue.cleanAll()
+
         val start = System.currentTimeMillis()
         repeat(20) {
             val key = generalString(12)

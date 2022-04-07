@@ -3,21 +3,21 @@ package com.mx.example
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.keyvalue.MXKeyValue
-import com.mx.keyvalue.delegate.MXStringDelegate
-import com.mx.keyvalue.secret.MXDESSecret
+import com.mx.keyvalue.secret.MXAESSecret
 import java.lang.StringBuilder
-import kotlin.concurrent.thread
-import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mxKeyValue = MXKeyValue(application, "mx_kv_test", MXDESSecret("uyrii809"))
+        val mxKeyValue = MXKeyValue(
+            application, "mx_kv_test",
+            MXAESSecret("34987xckj1230sdj", "821321235z3xcsdd")
+        )
 
         var spend = 0L
-        val time = 2000
+        val time = 20
         repeat(time) {
             val key = generalString(12)
             val value = generalString(1280)

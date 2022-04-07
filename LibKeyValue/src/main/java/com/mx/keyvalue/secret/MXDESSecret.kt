@@ -38,13 +38,15 @@ class MXDESSecret(desKeySpec: String) : IMXSecret {
         return if (secret == realSecret) realKey else relBase
     }
 
-    override fun encryptValue(key: String, value: String, secret: String): String {
+    override fun encryptValue(key: String, value: String?, secret: String): String? {
+        value ?: return null
         val relBytes = encryptCipher.doFinal((value + secret).toByteArray())
         val relBase = Base64.encode(relBytes, Base64.DEFAULT)
         return String(relBase)
     }
 
-    override fun decryptValue(key: String, secretValue: String, secret: String): String {
+    override fun decryptValue(key: String, secretValue: String?, secret: String): String? {
+        secretValue ?: return null
         val relBase =
             String(decryptCipher.doFinal(Base64.decode(secretValue, Base64.DEFAULT)))
         val realValue = relBase.substring(0, relBase.length - secretLength)

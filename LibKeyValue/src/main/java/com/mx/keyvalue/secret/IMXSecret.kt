@@ -20,11 +20,11 @@ interface IMXSecret {
      * 对Value加密
      * @param key 对应的Key
      */
-    fun encryptValue(key: String, value: String, secret: String): String
+    fun encryptValue(key: String, value: String?, secret: String): String?
 
     /**
      * 对Value解密
      * @param key 对应的Key
      */
-    fun decryptValue(key: String, secretValue: String, secret: String): String
+    fun decryptValue(key: String, secretValue: String?, secret: String): String?
 }

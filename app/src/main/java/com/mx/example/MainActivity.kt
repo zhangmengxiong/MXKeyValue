@@ -12,14 +12,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MXKeyValue.init(application, MXDESSecret("uyrii809"))
+        val mxKeyValue = MXKeyValue(application, "mx_kv_11", MXDESSecret("uyrii809"))
 
         thread {
             repeat(2) {
                 val key = generalString(12)
-                val value = generalString(1005)
-                MXKeyValue.set(key, value)
-                val read_value = MXKeyValue.get(key)
+                val value = generalString(100005)
+                mxKeyValue.set(key, value)
+                val read_value = mxKeyValue.get(key)
                 if (read_value != value) {
                     println("错误：$key -> $value -> $read_value")
                 } else {

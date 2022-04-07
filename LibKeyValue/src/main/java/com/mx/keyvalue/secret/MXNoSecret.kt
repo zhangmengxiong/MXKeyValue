@@ -16,11 +16,11 @@ class MXNoSecret : IMXSecret {
         return secretKey
     }
 
-    override fun encryptValue(key: String, value: String, secret: String): String {
+    override fun encryptValue(key: String, value: String?, secret: String): String? {
         return value
     }
 
-    override fun decryptValue(key: String, secretValue: String, secret: String): String {
+    override fun decryptValue(key: String, secretValue: String?, secret: String): String? {
         return secretValue
     }
 }

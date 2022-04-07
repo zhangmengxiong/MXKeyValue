@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 internal class MXKVSQLiteOpenHelper(context: Context, dbName: String) :
-    SQLiteOpenHelper(context, dbName, null, 1) {
+    SQLiteOpenHelper(context, dbName, null, 2) {
     companion object {
         const val DB_KEY_NAME = "kv_name"
         const val DB_KEY_VALUE = "kv_value"
@@ -13,10 +13,10 @@ internal class MXKVSQLiteOpenHelper(context: Context, dbName: String) :
         const val DB_KEY_UPDATE_TIME = "update_time"
     }
 
-    private val dbCreate = "create table $dbName($DB_KEY_NAME varchar(512) ," +
+    private val dbCreate = "create table $dbName($DB_KEY_NAME varchar(128) ," +
             "$DB_KEY_VALUE text ," +
-            "$DB_KEY_SECRET varchar(64)," +
-            "$DB_KEY_UPDATE_TIME long," +
+            "$DB_KEY_SECRET varchar(64) ," +
+            "$DB_KEY_UPDATE_TIME long ," +
             "primary key ($DB_KEY_NAME))"
     private val dbDrop = "DROP TABLE IF EXISTS $dbName"
 

@@ -20,7 +20,7 @@ open class MXDESSecret(desKeySpec: String) : IMXSecret {
     private val secretLength = 32
 
     override fun generalSecret(): String {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, secretLength)
+        return UUID.randomUUID().toString().replace("-", "")
     }
 
     override fun encryptKey(key: String, secret: String): String {

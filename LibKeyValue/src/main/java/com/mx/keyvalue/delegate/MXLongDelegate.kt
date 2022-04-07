@@ -3,7 +3,7 @@ package com.mx.keyvalue.delegate
 import com.mx.keyvalue.MXKeyValue
 import kotlin.reflect.KProperty
 
-class MXLongDelegate(
+open class MXLongDelegate(
     private val mxKeyValue: MXKeyValue,
     private val name: String,
     private val default: Long = 0

@@ -26,13 +26,17 @@ class MXKeyValue(
      * 设置KV
      */
     fun set(key: String, value: String?): Boolean {
-        return dbKeyValue.set(key.trim(), value?.trim())
+        val key = key.trim()
+        if (key.isBlank()) return false
+        return dbKeyValue.set(key, value?.trim())
     }
 
     /**
      * 获取KV
      */
     fun get(key: String, default: String? = null): String? {
+        val key = key.trim()
+        if (key.isBlank()) return default
         return dbKeyValue.get(key) ?: default
     }
 

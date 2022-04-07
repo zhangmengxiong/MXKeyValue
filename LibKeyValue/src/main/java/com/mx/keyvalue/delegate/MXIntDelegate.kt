@@ -3,7 +3,7 @@ package com.mx.keyvalue.delegate
 import com.mx.keyvalue.MXKeyValue
 import kotlin.reflect.KProperty
 
-class MXIntDelegate(
+open class MXIntDelegate(
     private val mxKeyValue: MXKeyValue,
     private val name: String,
     private val default: Int = 0

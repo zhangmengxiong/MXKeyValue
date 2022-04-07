@@ -9,7 +9,7 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * DES对称加密
  */
-class MXDESSecret(desKeySpec: String) : IMXSecret {
+open class MXDESSecret(desKeySpec: String) : IMXSecret {
     private val keySpec = SecretKeySpec(desKeySpec.toByteArray(), "DES")
     private val encryptCipher = Cipher.getInstance("DES/CBC/PKCS5Padding").apply {
         init(Cipher.ENCRYPT_MODE, keySpec, IvParameterSpec(desKeySpec.toByteArray()))

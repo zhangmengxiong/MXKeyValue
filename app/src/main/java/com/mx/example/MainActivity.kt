@@ -12,21 +12,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mxKeyValue = MXKeyValue(application, "mx_kv_11", MXDESSecret("uyrii809"))
-
-        thread {
-            repeat(2) {
-                val key = generalString(12)
-                val value = generalString(100005)
-                mxKeyValue.set(key, value)
-                val read_value = mxKeyValue.get(key)
-                if (read_value != value) {
-                    println("错误：$key -> $value -> $read_value")
-                } else {
-                    println("正确：$key -> $value -> $read_value")
-                }
+        val mxKeyValue = MXKeyValue(application, "mx_kv_test", MXDESSecret("uyrii809"))
+        mxKeyValue.cleanAll()
+        val start = System.currentTimeMillis()
+        repeat(20) {
+            val key = generalString(12)
+            val value = generalString(128)
+            mxKeyValue.set(key, value)
+            val read_value = mxKeyValue.get(key)
+            if (read_value != value) {
+                println("错误：$key -> $value -> $read_value")
+            } else {
+//                    println("正确：$key -> $value")
             }
         }
+        val diff = (System.currentTimeMillis() - start) / 1000f
+        println("耗时：$diff 秒")
     }
 
     private fun generalString(size: Int): String {

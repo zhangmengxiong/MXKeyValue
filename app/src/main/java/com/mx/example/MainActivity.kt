@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         println("测试 MXStringDelegate -> $stringDelegate")
 
 
-        var beanDelegate by MXBeanDelegate(KV, TestBean::class.java, "bean_test2")
+        var beanDelegate by MXBeanDelegate(KV, TestBean::class.java, "string_test", null)
         println("测试 BeanDelegate -> ${beanDelegate?.id} -> ${beanDelegate?.name}")
         beanDelegate = TestBean("2sdf", "name")
         println("测试 BeanDelegate -> ${beanDelegate?.id} -> ${beanDelegate?.name}")
@@ -98,11 +98,11 @@ class MainActivity : AppCompatActivity() {
 
     class MXBeanDelegate<T>(
         kv: MXKeyValue,
-        private val clazz: Class<T>,
-        name: String
-    ) : MXBaseDelegate<T>(kv, name) {
-        override fun stringToObject(value: String?): T? {
-            value ?: return null
+        private val clazz: Class<out T>,
+        name: String,
+        default: T
+    ) : MXBaseDelegate<T>(kv, name, default) {
+        override fun stringToObject(value: String): T {
             try {
                 val mapper = ObjectMapper()
                 mapper.registerKotlinModule()
@@ -110,14 +110,14 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            return null
+            return default
         }
 
-        override fun objectToString(value: T?): String? {
-            value ?: return null
+        override fun objectToString(obj: T): String? {
+            obj ?: return null
             try {
                 val mapper = ObjectMapper()
-                return mapper.writeValueAsString(value)
+                return mapper.writeValueAsString(obj)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

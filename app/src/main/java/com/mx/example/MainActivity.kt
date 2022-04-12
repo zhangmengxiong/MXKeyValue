@@ -96,9 +96,12 @@ class MainActivity : AppCompatActivity() {
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class TestBean constructor(val id: String, val name: String)
 
-    class MXBeanDelegate<T>(kv: MXKeyValue, clazz: Class<T>, name: String) :
-        MXBaseDelegate<T>(kv, clazz, name) {
-        override fun stringToObject(value: String?, clazz: Class<T>): T? {
+    class MXBeanDelegate<T>(
+        kv: MXKeyValue,
+        private val clazz: Class<T>,
+        name: String
+    ) : MXBaseDelegate<T>(kv, name) {
+        override fun stringToObject(value: String?): T? {
             value ?: return null
             try {
                 val mapper = ObjectMapper()
@@ -110,7 +113,7 @@ class MainActivity : AppCompatActivity() {
             return null
         }
 
-        override fun objectToString(value: T?, clazz: Class<T>): String? {
+        override fun objectToString(value: T?): String? {
             value ?: return null
             try {
                 val mapper = ObjectMapper()

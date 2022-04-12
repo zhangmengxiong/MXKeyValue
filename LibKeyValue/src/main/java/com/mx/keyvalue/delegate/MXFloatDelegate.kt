@@ -1,18 +1,14 @@
 package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
-import kotlin.reflect.KProperty
 
-open class MXFloatDelegate(
-    private val mxKeyValue: MXKeyValue,
-    private val name: String,
-    private val default: Float = 0f
-) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Float {
-        return mxKeyValue.get(name)?.toFloatOrNull() ?: default
+open class MXFloatDelegate(kv: MXKeyValue, name: String, private val default: Float = 0f) :
+    MXBaseDelegate<Float>(kv, Float::class.java, name) {
+    override fun stringToObject(value: String?, clazz: Class<Float>): Float {
+        return value?.toFloatOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Float) {
-        mxKeyValue.set(name, value.toString())
+    override fun objectToString(value: Float?, clazz: Class<Float>): String? {
+        return value?.toString()
     }
 }

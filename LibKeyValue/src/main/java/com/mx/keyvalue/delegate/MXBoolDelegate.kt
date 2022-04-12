@@ -1,18 +1,14 @@
 package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
-import kotlin.reflect.KProperty
 
-open class MXBoolDelegate(
-    private val mxKeyValue: MXKeyValue,
-    private val name: String,
-    private val default: Boolean = false
-) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Boolean {
-        return mxKeyValue.get(name)?.toBoolean() ?: default
+open class MXBoolDelegate(kv: MXKeyValue, name: String, private val default: Boolean = false) :
+    MXBaseDelegate<Boolean>(kv, Boolean::class.java, name) {
+    override fun stringToObject(value: String?, clazz: Class<Boolean>): Boolean {
+        return value?.toBoolean() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        mxKeyValue.set(name, value.toString())
+    override fun objectToString(value: Boolean?, clazz: Class<Boolean>): String? {
+        return value?.toString()
     }
 }

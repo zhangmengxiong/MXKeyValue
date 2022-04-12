@@ -1,18 +1,14 @@
 package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
-import kotlin.reflect.KProperty
 
-open class MXLongDelegate(
-    private val mxKeyValue: MXKeyValue,
-    private val name: String,
-    private val default: Long = 0
-) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Long {
-        return mxKeyValue.get(name)?.toLongOrNull() ?: default
+open class MXLongDelegate(kv: MXKeyValue, name: String, private val default: Long = 0) :
+    MXBaseDelegate<Long>(kv, Long::class.java, name) {
+    override fun stringToObject(value: String?, clazz: Class<Long>): Long {
+        return value?.toLongOrNull() ?: default
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Long) {
-        mxKeyValue.set(name, value.toString())
+    override fun objectToString(value: Long?, clazz: Class<Long>): String? {
+        return value?.toString()
     }
 }

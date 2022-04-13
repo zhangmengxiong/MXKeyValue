@@ -2,7 +2,7 @@ package com.mx.keyvalue.secret
 
 import android.util.Base64
 import com.mx.keyvalue.utils.MXUtils
-import java.security.MessageDigest
+import java.lang.StringBuilder
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -14,29 +14,52 @@ import kotlin.random.Random
  * @param key 加密用的Key
  */
 open class MXAESSecret(private val key: String) : IMXSecret {
-    companion object {
-        const val transformation = "AES/CBC/PKCS5Padding"
-    }
+
+    private val transformation = "AES/CBC/PKCS5Padding"
+    private val source = ('a'..'z') + ('A'..'Z') + ('0'..'9') + arrayOf(
+        '!', '@', '#', '$', '^', '&', '*', '(', ')', '_', '+', '-',
+        '=', '~', '`', ';', ':', ',', '<', '.', '>', '/', '?'
+    )
+    private val salt_key = arrayOf(
+        46, 85, 38, 47, 86, 0, 15, 54, 57, 56, 29, 22, 44, 109, 78,
+        51, 49, 39, 78, 12, 55, 28, 42, 2, 116, 71, 28, 93, 66, 102, 41, 63,
+        84, 40, 6, 24, 38, 77, 7, 84, 45, 22, 82, 94, 97, 14, 69, 30, 18,
+        51, 57, 94, 118, 124, 86, 126, 119, 103, 114, 84, 103, 42, 105, 40
+    )
+    private val salt_iv = arrayOf(
+        49, 75, 119, 8, 17, 68, 64, 12, 78, 106, 125, 109, 116, 11, 76,
+        75, 41, 48, 21, 98, 56, 70, 75, 66, 39, 97, 109, 106, 89, 87,
+        32, 111, 50, 100, 44, 12, 72, 37, 94, 40, 116, 31, 40, 6, 42, 49, 54,
+        6, 44, 9, 26, 20, 42, 90, 54, 67, 70, 85, 35, 74, 17, 86, 111, 70
+    )
 
     private var encryptCipher: Cipher? = null
     private var decryptCipher: Cipher? = null
 
     private fun generalMixKey(): ByteArray {
-        val a = if (key.isEmpty()) {
-            "=-1238zxkjpo`1*/*-.z,xmjclkqazx.,mc,mjoi7093485=-()&*^%$"
-        } else {// 加盐
-            key + "mx_aes_key_salt_2-03887xcv@#%^^*!@!@#^*"
+        val list = key.toMutableList()
+        val keys = StringBuilder()
+        for (i in salt_key) {
+            if (list.size > 0) {
+                keys.append(list.removeAt(0))
+            }
+            keys.append(source[i % source.size])
         }
-        return MXUtils.md5(a.reversed()).reversed().toByteArray()
+        keys.append(list.toCharArray())
+        return MXUtils.md5(keys.toString().toByteArray()).toByteArray()
     }
 
     private fun generalMixIv(): ByteArray {
-        val a = if (key.isEmpty()) {
-            "=-asd8927)(&%^$^#_)(_)))%$%6891723kzxljcmn,mxcjqao.=-()&*^%$"
-        } else {
-            key + "mss24546x_aes_key_salt_2-03887xcv@#%^^*!@!@#^*"
+        val list = key.reversed().toMutableList()
+        val keys = StringBuilder()
+        for (i in salt_iv) {
+            if (list.size > 0) {
+                keys.append(list.removeAt(0))
+            }
+            keys.append(source[i % source.size])
         }
-        return MXUtils.md5(a.reversed()).reversed().toByteArray()
+        keys.append(list.toCharArray())
+        return MXUtils.md5(keys.toString().toByteArray()).toByteArray()
     }
 
     init {

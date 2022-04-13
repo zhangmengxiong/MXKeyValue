@@ -24,7 +24,8 @@ internal class MXDBKeyValue(
                     arrayOf(
                         MXKVSQLiteOpenHelper.DB_KEY_NAME,
                         MXKVSQLiteOpenHelper.DB_KEY_VALUE,
-                        MXKVSQLiteOpenHelper.DB_KEY_SALT
+                        MXKVSQLiteOpenHelper.DB_KEY_SALT,
+                        MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME
                     ),
                     "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
                     arrayOf(key),
@@ -54,10 +55,10 @@ internal class MXDBKeyValue(
         return null
     }
 
-    override fun set(key: String, value: String?): Boolean {
+    override fun set(key: String, value: String?, dead_time: Long?): Boolean {
         synchronized(lock) {
+            val database = openHelper.writableDatabase
             try {
-                val database = openHelper.writableDatabase
                 val salt = mxSecret.generalSalt()
                 val value_encrypt = mxSecret.encrypt(key, value, salt)
 
@@ -66,9 +67,12 @@ internal class MXDBKeyValue(
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_VALUE, value_encrypt)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, salt)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
+                values.put(MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME, dead_time ?: 0L)
                 return database.replace(dbName, null, values) >= 0
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                database.close()
             }
         }
         return false
@@ -85,7 +89,8 @@ internal class MXDBKeyValue(
                     arrayOf(
                         MXKVSQLiteOpenHelper.DB_KEY_NAME,
                         MXKVSQLiteOpenHelper.DB_KEY_VALUE,
-                        MXKVSQLiteOpenHelper.DB_KEY_SALT
+                        MXKVSQLiteOpenHelper.DB_KEY_SALT,
+                        MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME
                     ), null, null, null, null, null
                 )
                 while (cursor.moveToNext()) {
@@ -110,13 +115,39 @@ internal class MXDBKeyValue(
         }
     }
 
+    override fun cleanExpire(): Boolean {
+        synchronized(lock) {
+            val database = openHelper.writableDatabase
+            try {
+                return database.delete(
+                    dbName,
+                    "${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}>0 and ${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}<?",
+                    arrayOf(System.currentTimeMillis().toString())
+                ) > 0
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    database.close()
+                } catch (e: Exception) {
+                }
+            }
+        }
+        return false
+    }
+
     override fun cleanAll(): Boolean {
         synchronized(lock) {
+            val database = openHelper.writableDatabase
             try {
-                val database = openHelper.writableDatabase
                 return database.delete(dbName, null, null) > 0
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                try {
+                    database.close()
+                } catch (e: Exception) {
+                }
             }
         }
         return false
@@ -133,6 +164,13 @@ internal class MXDBKeyValue(
             val salt = cursor.getString(
                 cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_SALT)
             )
+            val dead_time = cursor.getLong(
+                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME)
+            )
+            if (dead_time > 0 && dead_time < System.currentTimeMillis()) {
+                return null
+            }
+
             value = mxSecret.decrypt(key, value, salt)
             return Pair(key, value)
         } catch (e: java.lang.Exception) {

@@ -1,6 +1,7 @@
 package com.mx.example
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,7 +9,9 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.mx.keyvalue.MXKeyValue
 import com.mx.keyvalue.delegate.*
 import com.mx.keyvalue.secret.MXAESSecret
+import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.StringBuilder
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,9 +20,21 @@ class MainActivity : AppCompatActivity() {
 
         val KV = MXKeyValue(
             application, "mx_kv_test",
-            MXAESSecret("34987xckj1230sdj", "821321235z3xcsdd")
+            MXAESSecret("89qew0lkcjz;lkui1=2=--093475kjhzcklj")
         )
-        KV.cleanAll()
+//        KV.cleanAll()
+
+        setExpireTxv.setOnClickListener {
+            KV.set(
+                "test_expire_key",
+                "1分钟失效:" + System.currentTimeMillis(),
+                System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)
+            )
+            Toast.makeText(this, KV.get("test_expire_key", "失效"), Toast.LENGTH_SHORT).show()
+        }
+        readExpireTxv.setOnClickListener {
+            Toast.makeText(this, KV.get("test_expire_key", "失效"), Toast.LENGTH_SHORT).show()
+        }
 
         var spend = 0L
         val time = 20
@@ -76,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         println("测试 MXStringDelegate -> $stringDelegate")
 
 
-        var beanDelegate by MXBeanDelegate(KV, TestBean::class.java, "string_test", null)
+        var beanDelegate by MXBeanDelegate(KV, TestBean::class.java, "bean_test", null)
         println("测试 BeanDelegate -> ${beanDelegate?.id} -> ${beanDelegate?.name}")
         beanDelegate = TestBean("2sdf", "name")
         println("测试 BeanDelegate -> ${beanDelegate?.id} -> ${beanDelegate?.name}")
@@ -108,7 +123,6 @@ class MainActivity : AppCompatActivity() {
                 mapper.registerKotlinModule()
                 return mapper.readValue(value, clazz)
             } catch (e: Exception) {
-                e.printStackTrace()
             }
             return default
         }
@@ -119,7 +133,6 @@ class MainActivity : AppCompatActivity() {
                 val mapper = ObjectMapper()
                 return mapper.writeValueAsString(obj)
             } catch (e: Exception) {
-                e.printStackTrace()
             }
             return null
         }

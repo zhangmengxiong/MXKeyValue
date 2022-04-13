@@ -14,23 +14,29 @@ class MXKeyValue(
     private val dbKeyValue: IMXKeyValue =
         MXDBKeyValue(context.applicationContext, name.trim(), secret)
 
+    init {
+        dbKeyValue.cleanExpire()
+    }
+
     /**
      * 从SharedPreferences拷贝数据
      */
     fun cloneFromSharedPreferences(name: String) {
         val sp = context.getSharedPreferences(name, Context.MODE_PRIVATE)
         for (entry in sp.all) {
-            dbKeyValue.set(entry.key, entry.value?.toString())
+            if (entry.value != null) {
+                dbKeyValue.set(entry.key, entry.value?.toString(), null)
+            }
         }
     }
 
     /**
      * 设置KV
      */
-    fun set(key: String, value: String?): Boolean {
+    fun set(key: String, value: String?, expire_time: Long? = null): Boolean {
         val key = key.trim()
         if (key.isBlank()) return false
-        return dbKeyValue.set(key, value?.trim())
+        return dbKeyValue.set(key, value?.trim(), expire_time)
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.mx.keyvalue.secret
 
 import android.util.Base64
+import com.mx.keyvalue.utils.MXUtils
+import java.security.MessageDigest
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -9,27 +11,42 @@ import kotlin.random.Random
 
 /**
  * AES对称加密
- * @param key 加密用的Key 可以用26个字母和数字组成 此处使用AES-128-CBC加密模式，key需要为16位。
- * @param ivParameter 使用CBC模式，需要一个向量iv，可增加加密算法的强度 , 需要为16位
+ * @param key 加密用的Key
  */
-open class MXAESSecret(
-    private val key: String,
-    private val ivParameter: String
-) : IMXSecret {
+open class MXAESSecret(private val key: String) : IMXSecret {
+    companion object {
+        const val transformation = "AES/CBC/PKCS5Padding"
+    }
+
     private var encryptCipher: Cipher? = null
     private var decryptCipher: Cipher? = null
 
-    init {
-        if (key.length != 16 && ivParameter.length != 16) {
-            throw Exception("参数‘key’、‘ivParameter’的长度需要为16位")
+    private fun generalMixKey(): ByteArray {
+        val a = if (key.isEmpty()) {
+            "=-1238zxkjpo`1*/*-.z,xmjclkqazx.,mc,mjoi7093485=-()&*^%$"
+        } else {// 加盐
+            key + "mx_aes_key_salt_2-03887xcv@#%^^*!@!@#^*"
         }
+        return MXUtils.md5(a.reversed()).reversed().toByteArray()
+    }
 
-        val keySpec = SecretKeySpec(key.toByteArray(), "AES")
-        encryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding").apply {
-            init(Cipher.ENCRYPT_MODE, keySpec, IvParameterSpec(ivParameter.toByteArray()))
+    private fun generalMixIv(): ByteArray {
+        val a = if (key.isEmpty()) {
+            "=-asd8927)(&%^$^#_)(_)))%$%6891723kzxljcmn,mxcjqao.=-()&*^%$"
+        } else {
+            key + "mss24546x_aes_key_salt_2-03887xcv@#%^^*!@!@#^*"
         }
-        decryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding").apply {
-            init(Cipher.DECRYPT_MODE, keySpec, IvParameterSpec(ivParameter.toByteArray()))
+        return MXUtils.md5(a.reversed()).reversed().toByteArray()
+    }
+
+    init {
+        val keySpec = SecretKeySpec(generalMixKey(), "AES")
+        val ivSpec = IvParameterSpec(generalMixIv())
+        encryptCipher = Cipher.getInstance(transformation).apply {
+            init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
+        }
+        decryptCipher = Cipher.getInstance(transformation).apply {
+            init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
         }
     }
 

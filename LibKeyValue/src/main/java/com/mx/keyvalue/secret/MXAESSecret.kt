@@ -46,7 +46,7 @@ open class MXAESSecret(private val key: String) : IMXSecret {
             keys.append(source[i % source.size])
         }
         keys.append(list.toCharArray())
-        return MXUtils.md5(keys.toString().toByteArray()).toByteArray()
+        return MXUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
     }
 
     private fun generalMixIv(): ByteArray {
@@ -59,7 +59,7 @@ open class MXAESSecret(private val key: String) : IMXSecret {
             keys.append(source[i % source.size])
         }
         keys.append(list.toCharArray())
-        return MXUtils.md5(keys.toString().toByteArray()).toByteArray()
+        return MXUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
     }
 
     init {

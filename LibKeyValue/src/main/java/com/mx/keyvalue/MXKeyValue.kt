@@ -14,10 +14,6 @@ class MXKeyValue(
     private val dbKeyValue: IMXKeyValue =
         MXDBKeyValue(context.applicationContext, name.trim(), secret)
 
-    init {
-        dbKeyValue.cleanExpire()
-    }
-
     /**
      * 从SharedPreferences拷贝数据
      */
@@ -50,6 +46,13 @@ class MXKeyValue(
 
     fun getAll(): Map<String, String> {
         return dbKeyValue.getAll()
+    }
+
+    /**
+     * 清理过期KV
+     */
+    fun cleanExpire() {
+        dbKeyValue.cleanExpire()
     }
 
     /**

@@ -75,7 +75,7 @@ open class MXAESSecret(private val key: String) : IMXSecret {
 
     override fun generalSalt(): String {
         val length = Random.nextInt(15, 30)
-        return UUID.randomUUID().toString().substring(0, length)
+        return UUID.randomUUID().toString().replace("-", "").substring(0, length)
     }
 
     override fun encrypt(key: String, value: String?, salt: String): String? {

@@ -17,14 +17,14 @@ internal object MXUtils {
 
     fun md5(content: ByteArray, size: Int): String {
         val hash = MessageDigest.getInstance("MD5").digest(content)
-        val hex = StringBuilder(hash.size * 2)
+        val builder = StringBuilder()
         for (b in hash) {
-            var str = Integer.toHexString(b.toInt())
+            val str = Integer.toHexString(b.toInt() and 0xff)
             if (b < 0x10) {
-                str = "0$str"
+                builder.append('0')
             }
-            hex.append(str.substring(str.length - 2))
+            builder.append(str)
         }
-        return hex.toString().substring(0, size)
+        return builder.toString().substring(0, size).lowercase()
     }
 }

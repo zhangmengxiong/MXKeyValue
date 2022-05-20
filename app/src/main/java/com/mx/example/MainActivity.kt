@@ -9,9 +9,11 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.mx.keyvalue.MXKeyValue
 import com.mx.keyvalue.delegate.*
 import com.mx.keyvalue.secret.MXAESSecret
+import com.mx.keyvalue.secret.MXNoSecret
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.StringBuilder
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +24,7 @@ class MainActivity : AppCompatActivity() {
             application, "mx_kv_test",
             MXAESSecret("89qew0lkcjz;lkui1=2=--093475kjhzcklj")
         )
-//        KV.cleanAll()
+        KV.cleanAll()
 
         setExpireTxv.setOnClickListener {
             KV.set(
@@ -35,9 +37,13 @@ class MainActivity : AppCompatActivity() {
         readExpireTxv.setOnClickListener {
             Toast.makeText(this, KV.get("test_expire_key", "失效"), Toast.LENGTH_SHORT).show()
         }
+        deleteTxv.setOnClickListener {
+            KV.delete("test_expire_key")
+            Toast.makeText(this, KV.get("test_expire_key", "失效"), Toast.LENGTH_SHORT).show()
+        }
 
         var spend = 0L
-        val time = 20
+        val time = 200
         repeat(time) {
             val key = generalString(12)
             val value = generalString(1280)
@@ -52,8 +58,6 @@ class MainActivity : AppCompatActivity() {
             spend += (System.currentTimeMillis() - start)
         }
         println("平均耗时：${spend / time.toFloat()} ms")
-
-        println(KV.getAll().entries.joinToString(",") { "${it.key}, ${it.value}" })
 
         var boolDelegate by MXBoolDelegate(KV, "bool_test", true)
         println("测试 MXBoolDelegate -> $boolDelegate")

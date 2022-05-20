@@ -55,7 +55,7 @@ internal class MXDBKeyValue(
         return null
     }
 
-    override fun set(key: String, value: String?, dead_time: Long?): Boolean {
+    override fun set(key: String, value: String, dead_time: Long?): Boolean {
         synchronized(lock) {
             val database = openHelper.writableDatabase
             try {
@@ -73,6 +73,27 @@ internal class MXDBKeyValue(
                 e.printStackTrace()
             } finally {
                 database.close()
+            }
+        }
+        return false
+    }
+
+    override fun delete(key: String): Boolean {
+        synchronized(lock) {
+            val database = openHelper.writableDatabase
+            try {
+                return database.delete(
+                    dbName,
+                    "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
+                    arrayOf(key)
+                ) > 0
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                try {
+                    database.close()
+                } catch (e: Exception) {
+                }
             }
         }
         return false

@@ -2,7 +2,8 @@ package com.mx.keyvalue.base
 
 internal interface IMXKeyValue {
     fun get(key: String): String?
-    fun set(key: String, value: String?, dead_time: Long?): Boolean
+    fun set(key: String, value: String, dead_time: Long?): Boolean
+    fun delete(key: String): Boolean
 
     fun getAll(): Map<String, String>
 

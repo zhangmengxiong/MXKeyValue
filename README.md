@@ -9,7 +9,7 @@
 
 ## 使用方法
 
-```
+```kotlin
 val KV = MXKeyValue(
     application, // context
     name = "mx_kv_test", // 存储数据库名称
@@ -64,7 +64,7 @@ MXAESSecret = AES对称加密
 - generalSalt() = 生成当条记录的混淆字段
 - encrypt方法 = 源数据Value->存储Value
 - decrypt方法 = 存储Value->源数据Value
-```
+```kotlin
 class MySecret : IMXSecret {
     private val divider = "$$$$$$$$$$$$"
     override fun generalSalt(): String {
@@ -81,7 +81,7 @@ class MySecret : IMXSecret {
 }
 ```
 使用方法：
-```
+```kotlin
 val KV = MXKeyValue(
     application,
     name = "mx_kv_test",

@@ -5,17 +5,22 @@ import android.content.Context
 import android.database.Cursor
 import com.mx.keyvalue.base.IMXKeyValue
 import com.mx.keyvalue.secret.IMXSecret
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 internal class MXDBKeyValue(
     context: Context,
     private val dbName: String,
     private val mxSecret: IMXSecret
 ) : IMXKeyValue {
-    private val lock = Object()
+    private val lock = ReentrantReadWriteLock(true)
+    private val read_lock = lock.readLock()
+    private val write_lock = lock.writeLock()
+
     private val openHelper = MXKVSQLiteOpenHelper(context, dbName)
 
     override fun get(key: String): String? {
-        synchronized(lock) {
+        read_lock.lock()
+        try {
             val database = openHelper.readableDatabase
             var cursor: Cursor? = null
             try {
@@ -47,16 +52,19 @@ internal class MXDBKeyValue(
                 } catch (e: Exception) {
                 }
                 try {
-                    database.close()
+                    // database.close()
                 } catch (e: Exception) {
                 }
             }
+        } finally {
+            read_lock.unlock()
         }
         return null
     }
 
     override fun set(key: String, value: String, dead_time: Long?): Boolean {
-        synchronized(lock) {
+        write_lock.lock()
+        try {
             val database = openHelper.writableDatabase
             try {
                 val salt = mxSecret.generalSalt()
@@ -72,14 +80,17 @@ internal class MXDBKeyValue(
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                database.close()
+                // database.close()
             }
+        } finally {
+            write_lock.unlock()
         }
         return false
     }
 
     override fun delete(key: String): Boolean {
-        synchronized(lock) {
+        write_lock.lock()
+        try {
             val database = openHelper.writableDatabase
             try {
                 return database.delete(
@@ -91,16 +102,19 @@ internal class MXDBKeyValue(
                 e.printStackTrace()
             } finally {
                 try {
-                    database.close()
+                    // database.close()
                 } catch (e: Exception) {
                 }
             }
+        } finally {
+            write_lock.unlock()
         }
         return false
     }
 
     override fun getAll(): Map<String, String> {
-        synchronized(lock) {
+        read_lock.lock()
+        try {
             val database = openHelper.readableDatabase
             val result = HashMap<String, String>()
             var cursor: Cursor? = null
@@ -128,16 +142,19 @@ internal class MXDBKeyValue(
                 } catch (e: Exception) {
                 }
                 try {
-                    database.close()
+                    // database.close()
                 } catch (e: Exception) {
                 }
             }
             return result
+        } finally {
+            read_lock.unlock()
         }
     }
 
     override fun cleanExpire(): Boolean {
-        synchronized(lock) {
+        write_lock.lock()
+        try {
             val database = openHelper.writableDatabase
             try {
                 return database.delete(
@@ -149,16 +166,19 @@ internal class MXDBKeyValue(
                 e.printStackTrace()
             } finally {
                 try {
-                    database.close()
+                    // database.close()
                 } catch (e: Exception) {
                 }
             }
+        } finally {
+            write_lock.unlock()
         }
         return false
     }
 
     override fun cleanAll(): Boolean {
-        synchronized(lock) {
+        write_lock.lock()
+        try {
             val database = openHelper.writableDatabase
             try {
                 return database.delete(dbName, null, null) > 0
@@ -166,10 +186,12 @@ internal class MXDBKeyValue(
                 e.printStackTrace()
             } finally {
                 try {
-                    database.close()
+                    // database.close()
                 } catch (e: Exception) {
                 }
             }
+        } finally {
+            write_lock.unlock()
         }
         return false
     }

@@ -13,18 +13,43 @@ import com.mx.keyvalue.secret.MXNoSecret
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.StringBuilder
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val KV = MXKeyValue(
+    private val KV by lazy {
+        MXKeyValue(
             application, "mx_kv_test",
             MXAESSecret("89qew0lkcjz;lkui1=2=--093475kjhzcklj")
         )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
         KV.cleanAll()
+        syncTestTxv.setOnClickListener {
+            repeat(10) {
+                thread {
+                    repeat(100000) {
+                        val key = generalString(12)
+                        KV.get(key)
+                        Thread.sleep(Random.nextLong(10, 100))
+                    }
+                }
+            }
+            repeat(10) {
+                thread {
+                    repeat(100000) {
+                        val key = generalString(12)
+                        val value = generalString(1280)
+                        KV.set(key, value)
+                        Thread.sleep(Random.nextLong(10, 100))
+                    }
+                }
+            }
+        }
+
 
         setExpireTxv.setOnClickListener {
             KV.set(

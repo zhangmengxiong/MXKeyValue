@@ -27,4 +27,11 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="删除KEY" />
+
+    <TextView
+        android:id="@+id/syncTestTxv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="多线程测试" />
 </LinearLayout>

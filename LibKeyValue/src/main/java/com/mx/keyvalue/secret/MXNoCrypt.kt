@@ -3,7 +3,7 @@ package com.mx.keyvalue.secret
 /**
  * 不加密
  */
-open class MXNoSecret : IMXSecret {
+open class MXNoCrypt : IMXCrypt {
     override fun generalSalt(): String {
         return ""
     }

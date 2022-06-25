@@ -13,7 +13,7 @@
 val KV = MXKeyValue(
     application, // context
     name = "mx_kv_test", // 存储数据库名称
-    secret = MXNoSecret() // 加密方式
+    secret = MXNoCrypt() // 加密方式
 )
 
 // 清理所有KV
@@ -46,26 +46,26 @@ KV.cloneFromSharedPreferences("sp_name")
 
 ## 加密相关
 MXKeyValue内置两种加密方式：
-- MXNoSecret()
-- MXAESSecret("加密字符")
+- MXNoCrypt()
+- MXAESCrypt("加密字符")
 
 ### MXNoSecret
-MXNoSecret = 不加密，存储Value=设置的Value
+MXNoCrypt = 不加密，存储Value=设置的Value
 
 ### MXAESSecret
-MXAESSecret = AES对称加密
+MXAESCrypt = AES对称加密
 - 存储的value=encrypt(设置的Value)
 - 读取的Value=decrypt(存储的Value)
 
 注意：MXAESSecret初始化的加密字符在app上线后不能修改，否则会导致数据读取错误！
 
 ### 自定义加密方式
-- 需要实现IMXSecret接口
+- 需要实现IMXCrypt接口
 - generalSalt() = 生成当条记录的混淆字段
 - encrypt方法 = 源数据Value->存储Value
 - decrypt方法 = 存储Value->源数据Value
 ```kotlin
-class MySecret : IMXSecret {
+class MyCrypt : IMXCrypt {
     private val divider = "$$$$$$$$$$$$"
     override fun generalSalt(): String {
         return UUID.randomUUID().toString().replace("-", "")
@@ -85,6 +85,6 @@ class MySecret : IMXSecret {
 val KV = MXKeyValue(
     application,
     name = "mx_kv_test",
-    secret = MySecret() // 加密方式
+    secret = MyCrypt() // 加密方式
 )
 ```

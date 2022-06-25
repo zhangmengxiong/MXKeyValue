@@ -1,10 +1,10 @@
-package com.mx.keyvalue.db
+package com.mx.keyvalue.store.sqlite
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-internal class MXKVSQLiteOpenHelper(context: Context, dbName: String) :
+internal class MXSQLiteHelper(context: Context, dbName: String) :
     SQLiteOpenHelper(context, dbName, null, 4) {
     companion object {
         const val DB_KEY_NAME = "kv_name"

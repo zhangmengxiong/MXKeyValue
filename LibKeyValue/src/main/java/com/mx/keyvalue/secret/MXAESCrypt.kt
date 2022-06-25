@@ -2,7 +2,6 @@ package com.mx.keyvalue.secret
 
 import android.util.Base64
 import com.mx.keyvalue.utils.MXUtils
-import java.lang.StringBuilder
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -13,7 +12,7 @@ import kotlin.random.Random
  * AES对称加密
  * @param key 加密用的Key
  */
-open class MXAESSecret(private val key: String) : IMXSecret {
+open class MXAESCrypt(private val key: String) : IMXCrypt {
     companion object {
         private val salt_key = arrayOf(
             65, 110, 123, 56, 3, 115, 73, 29, 108, 117, 98, 47, 93, 10, 71,

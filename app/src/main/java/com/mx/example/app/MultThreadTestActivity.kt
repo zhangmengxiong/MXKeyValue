@@ -33,6 +33,7 @@ class MultThreadTestActivity : AppCompatActivity() {
         if (!SPUtils.set(key, value)) {
             println("写入错误：$key -> $value")
         }
+        Thread.sleep(Random.nextLong(0, 20))
         val read = SPUtils.get(key)
         if (read != value) {
             println("读取错误1：$key -> $value")

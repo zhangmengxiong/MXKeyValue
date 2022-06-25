@@ -1,9 +1,9 @@
 package com.mx.example.utils
 
-import com.mx.keyvalue.secret.IMXSecret
+import com.mx.keyvalue.secret.IMXCrypt
 import java.util.*
 
-class MySecret : IMXSecret {
+class MyCrypt : IMXCrypt {
     private val divider = "$$$$$$$$$$$$"
     override fun generalSalt(): String {
         return UUID.randomUUID().toString().replace("-", "")

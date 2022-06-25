@@ -1,36 +1,34 @@
-package com.mx.keyvalue.db
+package com.mx.keyvalue.store.sqlite
 
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.mx.keyvalue.base.IMXKeyValue
-import com.mx.keyvalue.secret.IMXSecret
+import com.mx.keyvalue.secret.IMXCrypt
+import com.mx.keyvalue.store.IKVStore
 import com.mx.keyvalue.utils.MXUtils
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
-internal class MXDBKeyValue(
+internal class MXSqliteStore(
     private val context: Context,
     private val dbName: String,
-    private val mxSecret: IMXSecret
-) : IMXKeyValue {
+    private val crypt: IMXCrypt
+) : IKVStore {
     private val lock = ReentrantReadWriteLock(true)
-    private var openHelper: SQLiteOpenHelper? = null
+    private var sqliteHelper: SQLiteOpenHelper? = null
 
     private fun getDatabase(): SQLiteDatabase {
-        var sqLiteOpenHelper = openHelper
-        if (sqLiteOpenHelper == null) {
+        if (sqliteHelper == null) {
             synchronized(this) {
-                if (sqLiteOpenHelper == null) {
-                    sqLiteOpenHelper = MXKVSQLiteOpenHelper(context, dbName)
-                    this.openHelper = sqLiteOpenHelper
+                if (sqliteHelper == null) {
+                    sqliteHelper = MXSQLiteHelper(context, dbName)
                 }
             }
         }
-        return sqLiteOpenHelper!!.writableDatabase
+        return sqliteHelper!!.writableDatabase
     }
 
     override fun get(key: String): String? {
@@ -41,12 +39,12 @@ internal class MXDBKeyValue(
                 cursor = database.query(
                     dbName,
                     arrayOf(
-                        MXKVSQLiteOpenHelper.DB_KEY_NAME,
-                        MXKVSQLiteOpenHelper.DB_KEY_VALUE,
-                        MXKVSQLiteOpenHelper.DB_KEY_SALT,
-                        MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME
+                        MXSQLiteHelper.DB_KEY_NAME,
+                        MXSQLiteHelper.DB_KEY_VALUE,
+                        MXSQLiteHelper.DB_KEY_SALT,
+                        MXSQLiteHelper.DB_KEY_DEAD_TIME
                     ),
-                    "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
+                    "${MXSQLiteHelper.DB_KEY_NAME}=?",
                     arrayOf(key),
                     null,
                     null,
@@ -76,15 +74,15 @@ internal class MXDBKeyValue(
             val database = getDatabase()
             try {
                 database.beginTransaction()
-                val salt = mxSecret.generalSalt()
-                val value_encrypt = mxSecret.encrypt(key, value, salt)
+                val salt = crypt.generalSalt()
+                val value_encrypt = crypt.encrypt(key, value, salt)
 
                 val values = ContentValues()
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_NAME, key)
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_VALUE, value_encrypt)
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, salt)
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
-                values.put(MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME, dead_time ?: 0L)
+                values.put(MXSQLiteHelper.DB_KEY_NAME, key)
+                values.put(MXSQLiteHelper.DB_KEY_VALUE, value_encrypt)
+                values.put(MXSQLiteHelper.DB_KEY_SALT, salt)
+                values.put(MXSQLiteHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
+                values.put(MXSQLiteHelper.DB_KEY_DEAD_TIME, dead_time ?: 0L)
                 val result = database.replace(dbName, null, values) >= 0
                 database.setTransactionSuccessful()
                 return result
@@ -105,7 +103,7 @@ internal class MXDBKeyValue(
                 database.beginTransaction()
                 val result = database.delete(
                     dbName,
-                    "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
+                    "${MXSQLiteHelper.DB_KEY_NAME}=?",
                     arrayOf(key)
                 ) > 0
                 database.setTransactionSuccessful()
@@ -129,10 +127,10 @@ internal class MXDBKeyValue(
                 cursor = database.query(
                     dbName,
                     arrayOf(
-                        MXKVSQLiteOpenHelper.DB_KEY_NAME,
-                        MXKVSQLiteOpenHelper.DB_KEY_VALUE,
-                        MXKVSQLiteOpenHelper.DB_KEY_SALT,
-                        MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME
+                        MXSQLiteHelper.DB_KEY_NAME,
+                        MXSQLiteHelper.DB_KEY_VALUE,
+                        MXSQLiteHelper.DB_KEY_SALT,
+                        MXSQLiteHelper.DB_KEY_DEAD_TIME
                     ), null, null, null, null, null
                 )
                 while (cursor.moveToNext()) {
@@ -161,7 +159,7 @@ internal class MXDBKeyValue(
                 database.beginTransaction()
                 val result = database.delete(
                     dbName,
-                    "${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}>0 and ${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}<?",
+                    "${MXSQLiteHelper.DB_KEY_DEAD_TIME}>0 and ${MXSQLiteHelper.DB_KEY_DEAD_TIME}<?",
                     arrayOf(System.currentTimeMillis().toString())
                 ) > 0
                 database.setTransactionSuccessful()
@@ -197,22 +195,22 @@ internal class MXDBKeyValue(
     private fun cursorToEntry(cursor: Cursor): Pair<String, String>? {
         try {
             val key = cursor.getString(
-                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_NAME)
+                cursor.getColumnIndexOrThrow(MXSQLiteHelper.DB_KEY_NAME)
             )
             var value = cursor.getString(
-                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_VALUE)
+                cursor.getColumnIndexOrThrow(MXSQLiteHelper.DB_KEY_VALUE)
             )
             val salt = cursor.getString(
-                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_SALT)
+                cursor.getColumnIndexOrThrow(MXSQLiteHelper.DB_KEY_SALT)
             )
             val dead_time = cursor.getLong(
-                cursor.getColumnIndexOrThrow(MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME)
+                cursor.getColumnIndexOrThrow(MXSQLiteHelper.DB_KEY_DEAD_TIME)
             )
             if (dead_time > 0 && dead_time < System.currentTimeMillis()) {
                 return null
             }
 
-            value = mxSecret.decrypt(key, value, salt)
+            value = crypt.decrypt(key, value, salt)
             return Pair(key, value)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -221,7 +219,9 @@ internal class MXDBKeyValue(
     }
 
     override fun release() {
-        openHelper?.close()
-        openHelper = null
+        synchronized(this) {
+            sqliteHelper?.close()
+            sqliteHelper = null
+        }
     }
 }

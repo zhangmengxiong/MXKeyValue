@@ -1,19 +1,18 @@
 package com.mx.keyvalue
 
 import android.content.Context
-import com.mx.keyvalue.base.IMXKeyValue
-import com.mx.keyvalue.db.MXDBKeyValue
-import com.mx.keyvalue.secret.IMXSecret
-import com.mx.keyvalue.secret.MXNoSecret
+import com.mx.keyvalue.secret.IMXCrypt
+import com.mx.keyvalue.secret.MXNoCrypt
+import com.mx.keyvalue.store.IKVStore
+import com.mx.keyvalue.store.sqlite.MXSqliteStore
 import com.mx.keyvalue.utils.MXKVObservable
 import com.mx.keyvalue.utils.MXKVObserver
 import com.mx.keyvalue.utils.MXUtils
-import kotlin.collections.HashMap
 
 class MXKeyValue(
     private val context: Context,
     private val name: String,
-    private val secret: IMXSecret = MXNoSecret()
+    private val crypt: IMXCrypt = MXNoCrypt()
 ) {
     companion object {
         fun setDebug(debug: Boolean) {
@@ -22,14 +21,14 @@ class MXKeyValue(
     }
 
     private val observerSet = HashMap<String, MXKVObservable>()
-    private val dbKeyValue: IMXKeyValue by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXDBKeyValue(context.applicationContext, name.trim(), secret)
+    private val ikvStore: IKVStore by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        MXSqliteStore(context.applicationContext, name.trim(), crypt)
     }
 
     init {
-        if (!secret.validate()) {
+        if (!crypt.validate()) {
             // 验证Secret 工具类解密正确性
-            throw Exception("${secret::class.java.simpleName}  --->  IMXSecret Class validate error.")
+            throw Exception("${crypt::class.java.simpleName}  --->  IMXSecret Class validate error.")
         }
     }
 
@@ -41,7 +40,7 @@ class MXKeyValue(
         for (entry in sp.all) {
             val value = entry.value?.toString()
             if (value != null) {
-                dbKeyValue.set(entry.key, value, null)
+                ikvStore.set(entry.key, value, null)
             }
         }
     }
@@ -53,9 +52,9 @@ class MXKeyValue(
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
         val result = if (value != null && value.isNotEmpty()) {
-            dbKeyValue.set(key_trim, value, expire_time)
+            ikvStore.set(key_trim, value, expire_time)
         } else {
-            dbKeyValue.delete(key_trim)
+            ikvStore.delete(key_trim)
         }
         observerSet[key]?.set(value)
         return result
@@ -67,7 +66,7 @@ class MXKeyValue(
     fun get(key: String, default: String? = null): String? {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return default
-        return dbKeyValue.get(key_trim) ?: default
+        return ikvStore.get(key_trim) ?: default
     }
 
     /**
@@ -76,27 +75,27 @@ class MXKeyValue(
     fun delete(key: String): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
-        val result = dbKeyValue.delete(key_trim)
+        val result = ikvStore.delete(key_trim)
         observerSet[key]?.set(null)
         return result
     }
 
     fun getAll(): Map<String, String> {
-        return dbKeyValue.getAll()
+        return ikvStore.getAll()
     }
 
     /**
      * 清理过期KV
      */
     fun cleanExpire() {
-        dbKeyValue.cleanExpire()
+        ikvStore.cleanExpire()
     }
 
     /**
      * 清理数据
      */
     fun cleanAll(): Boolean {
-        return dbKeyValue.cleanAll()
+        return ikvStore.cleanAll()
     }
 
     fun addKeyObserver(key: String, observer: MXKVObserver) {
@@ -115,6 +114,6 @@ class MXKeyValue(
 
     fun release() {
         observerSet.clear()
-        dbKeyValue.release()
+        ikvStore.release()
     }
 }

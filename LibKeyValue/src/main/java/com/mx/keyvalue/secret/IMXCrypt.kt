@@ -3,7 +3,7 @@ package com.mx.keyvalue.secret
 import com.mx.keyvalue.utils.MXUtils
 import java.util.*
 
-interface IMXSecret {
+interface IMXCrypt {
     /**
      * 生成随机密码
      */

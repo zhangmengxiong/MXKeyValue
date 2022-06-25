@@ -5,12 +5,12 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.mx.example.MyApp
 import com.mx.keyvalue.MXKeyValue
 import com.mx.keyvalue.delegate.MXBaseDelegate
-import com.mx.keyvalue.secret.MXAESSecret
+import com.mx.keyvalue.secret.MXAESCrypt
 
 // 缓存类
 object SPUtils {
     val KV by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXKeyValue(MyApp.appContext, "kvdb_kv_v1", MXAESSecret("27e2125d0a11a9aa65b9c9773673bc2a"))
+        MXKeyValue(MyApp.appContext, "kvdb_kv_v1", MXAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
     }
     fun get(key: String, def: String? = null): String? {
         return KV.get(key, def)

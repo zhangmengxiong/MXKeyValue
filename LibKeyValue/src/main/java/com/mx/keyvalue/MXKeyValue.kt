@@ -5,14 +5,26 @@ import com.mx.keyvalue.base.IMXKeyValue
 import com.mx.keyvalue.db.MXDBKeyValue
 import com.mx.keyvalue.secret.IMXSecret
 import com.mx.keyvalue.secret.MXNoSecret
+import com.mx.keyvalue.utils.MXKVObservable
+import com.mx.keyvalue.utils.MXKVObserver
+import com.mx.keyvalue.utils.MXUtils
+import kotlin.collections.HashMap
 
 class MXKeyValue(
     private val context: Context,
-    name: String,
-    secret: IMXSecret = MXNoSecret()
+    private val name: String,
+    private val secret: IMXSecret = MXNoSecret()
 ) {
-    private val dbKeyValue: IMXKeyValue =
+    companion object {
+        fun setDebug(debug: Boolean) {
+            MXUtils.setDebug(debug)
+        }
+    }
+
+    private val observerSet = HashMap<String, MXKVObservable>()
+    private val dbKeyValue: IMXKeyValue by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         MXDBKeyValue(context.applicationContext, name.trim(), secret)
+    }
 
     init {
         if (!secret.validate()) {
@@ -40,11 +52,13 @@ class MXKeyValue(
     fun set(key: String, value: String?, expire_time: Long? = null): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
-        return if (value != null && value.isNotEmpty()) {
+        val result = if (value != null && value.isNotEmpty()) {
             dbKeyValue.set(key_trim, value, expire_time)
         } else {
             dbKeyValue.delete(key_trim)
         }
+        observerSet[key]?.set(value)
+        return result
     }
 
     /**
@@ -62,7 +76,9 @@ class MXKeyValue(
     fun delete(key: String): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
-        return dbKeyValue.delete(key_trim)
+        val result = dbKeyValue.delete(key_trim)
+        observerSet[key]?.set(null)
+        return result
     }
 
     fun getAll(): Map<String, String> {
@@ -81,5 +97,24 @@ class MXKeyValue(
      */
     fun cleanAll(): Boolean {
         return dbKeyValue.cleanAll()
+    }
+
+    fun addKeyObserver(key: String, observer: MXKVObserver) {
+        var observable = observerSet[key]
+        if (observable == null) {
+            observable = MXKVObservable(key, get(key))
+            observerSet[key] = observable
+        }
+        observable.addObserver(observer)
+    }
+
+    fun removeKeyObserver(key: String, observer: MXKVObserver) {
+        val observable = observerSet[key] ?: return
+        observable.deleteObserver(observer)
+    }
+
+    fun release() {
+        observerSet.clear()
+        dbKeyValue.release()
     }
 }

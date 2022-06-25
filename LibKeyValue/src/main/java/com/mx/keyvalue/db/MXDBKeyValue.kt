@@ -3,27 +3,41 @@ package com.mx.keyvalue.db
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
 import com.mx.keyvalue.base.IMXKeyValue
 import com.mx.keyvalue.secret.IMXSecret
+import com.mx.keyvalue.utils.MXUtils
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 internal class MXDBKeyValue(
-    context: Context,
+    private val context: Context,
     private val dbName: String,
     private val mxSecret: IMXSecret
 ) : IMXKeyValue {
     private val lock = ReentrantReadWriteLock(true)
-    private val read_lock = lock.readLock()
-    private val write_lock = lock.writeLock()
+    private var openHelper: SQLiteOpenHelper? = null
 
-    private val openHelper = MXKVSQLiteOpenHelper(context, dbName)
+    private fun getDatabase(): SQLiteDatabase {
+        var sqLiteOpenHelper = openHelper
+        if (sqLiteOpenHelper == null) {
+            synchronized(this) {
+                if (sqLiteOpenHelper == null) {
+                    sqLiteOpenHelper = MXKVSQLiteOpenHelper(context, dbName)
+                    this.openHelper = sqLiteOpenHelper
+                }
+            }
+        }
+        return sqLiteOpenHelper!!.writableDatabase
+    }
 
     override fun get(key: String): String? {
-        read_lock.lock()
-        try {
-            val database = openHelper.readableDatabase
+        lock.read {
             var cursor: Cursor? = null
             try {
+                val database = getDatabase()
                 cursor = database.query(
                     dbName,
                     arrayOf(
@@ -46,27 +60,22 @@ internal class MXDBKeyValue(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("get错误 -> $key -- ${e.message}")
             } finally {
                 try {
                     cursor?.close()
                 } catch (e: Exception) {
                 }
-                try {
-                    // database.close()
-                } catch (e: Exception) {
-                }
             }
-        } finally {
-            read_lock.unlock()
         }
         return null
     }
 
     override fun set(key: String, value: String, dead_time: Long?): Boolean {
-        write_lock.lock()
-        try {
-            val database = openHelper.writableDatabase
+        lock.write {
+            val database = getDatabase()
             try {
+                database.beginTransaction()
                 val salt = mxSecret.generalSalt()
                 val value_encrypt = mxSecret.encrypt(key, value, salt)
 
@@ -76,46 +85,44 @@ internal class MXDBKeyValue(
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_SALT, salt)
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
                 values.put(MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME, dead_time ?: 0L)
-                return database.replace(dbName, null, values) >= 0
+                val result = database.replace(dbName, null, values) >= 0
+                database.setTransactionSuccessful()
+                return result
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("set错误 -> $key = $value ; $dead_time -- ${e.message}")
             } finally {
-                // database.close()
+                database.endTransaction()
             }
-        } finally {
-            write_lock.unlock()
         }
         return false
     }
 
     override fun delete(key: String): Boolean {
-        write_lock.lock()
-        try {
-            val database = openHelper.writableDatabase
+        lock.write {
+            val database = getDatabase()
             try {
-                return database.delete(
+                database.beginTransaction()
+                val result = database.delete(
                     dbName,
                     "${MXKVSQLiteOpenHelper.DB_KEY_NAME}=?",
                     arrayOf(key)
                 ) > 0
+                database.setTransactionSuccessful()
+                return result
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("delete错误 -> $key -- ${e.message}")
             } finally {
-                try {
-                    // database.close()
-                } catch (e: Exception) {
-                }
+                database.endTransaction()
             }
-        } finally {
-            write_lock.unlock()
         }
         return false
     }
 
     override fun getAll(): Map<String, String> {
-        read_lock.lock()
-        try {
-            val database = openHelper.readableDatabase
+        lock.read {
+            val database = getDatabase()
             val result = HashMap<String, String>()
             var cursor: Cursor? = null
             try {
@@ -136,62 +143,53 @@ internal class MXDBKeyValue(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("getAll错误 -> ${e.message}")
             } finally {
                 try {
                     cursor?.close()
                 } catch (e: Exception) {
                 }
-                try {
-                    // database.close()
-                } catch (e: Exception) {
-                }
             }
             return result
-        } finally {
-            read_lock.unlock()
         }
     }
 
     override fun cleanExpire(): Boolean {
-        write_lock.lock()
-        try {
-            val database = openHelper.writableDatabase
+        lock.write {
+            val database = getDatabase()
             try {
-                return database.delete(
+                database.beginTransaction()
+                val result = database.delete(
                     dbName,
                     "${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}>0 and ${MXKVSQLiteOpenHelper.DB_KEY_DEAD_TIME}<?",
                     arrayOf(System.currentTimeMillis().toString())
                 ) > 0
+                database.setTransactionSuccessful()
+                return result
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("cleanExpire错误 -> ${e.message}")
             } finally {
-                try {
-                    // database.close()
-                } catch (e: Exception) {
-                }
+                database.endTransaction()
             }
-        } finally {
-            write_lock.unlock()
         }
         return false
     }
 
     override fun cleanAll(): Boolean {
-        write_lock.lock()
-        try {
-            val database = openHelper.writableDatabase
+        lock.write {
+            val database = getDatabase()
             try {
-                return database.delete(dbName, null, null) > 0
+                database.beginTransaction()
+                val result = database.delete(dbName, null, null) > 0
+                database.setTransactionSuccessful()
+                return result
             } catch (e: Exception) {
                 e.printStackTrace()
+                MXUtils.log("cleanAll错误 -> ${e.message}")
             } finally {
-                try {
-                    // database.close()
-                } catch (e: Exception) {
-                }
+                database.endTransaction()
             }
-        } finally {
-            write_lock.unlock()
         }
         return false
     }
@@ -216,9 +214,14 @@ internal class MXDBKeyValue(
 
             value = mxSecret.decrypt(key, value, salt)
             return Pair(key, value)
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return null
+    }
+
+    override fun release() {
+        openHelper?.close()
+        openHelper = null
     }
 }

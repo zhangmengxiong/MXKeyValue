@@ -8,23 +8,23 @@
     tools:context=".app.MainActivity">
 
     <TextView
-        android:id="@+id/expireTestTxv"
+        android:id="@+id/setExpireTxv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="超时测试" />
+        android:text="设置KEY失效1分钟" />
 
     <TextView
-        android:id="@+id/threadTestTxv"
+        android:id="@+id/readExpireTxv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="多线程测试" />
+        android:text="读取KEY" />
 
     <TextView
-        android:id="@+id/delegateTestTxv"
+        android:id="@+id/deleteTxv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="对象代理测试" />
+        android:text="删除KEY" />
 </LinearLayout>

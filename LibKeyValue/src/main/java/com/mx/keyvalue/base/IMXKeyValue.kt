@@ -9,4 +9,6 @@ internal interface IMXKeyValue {
 
     fun cleanExpire(): Boolean
     fun cleanAll(): Boolean
+
+    fun release()
 }

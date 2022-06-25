@@ -1,4 +1,4 @@
-package com.mx.example
+package com.mx.example.utils
 
 import com.mx.keyvalue.secret.IMXSecret
 import java.util.*

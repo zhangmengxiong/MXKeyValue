@@ -45,9 +45,6 @@ open class MXAESSecret(private val key: String) : IMXSecret {
 
     private val transformation = "AES/CBC/PKCS5Padding"
 
-    private var encryptCipher: Cipher? = null
-    private var decryptCipher: Cipher? = null
-
     private fun generalMixKey(): ByteArray {
         val list = key.toMutableList()
         val keys = StringBuilder()
@@ -74,16 +71,16 @@ open class MXAESSecret(private val key: String) : IMXSecret {
         return MXUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
     }
 
-    init {
-        val keySpec = SecretKeySpec(generalMixKey(), "AES")
-        val ivSpec = IvParameterSpec(generalMixIv())
-        encryptCipher = Cipher.getInstance(transformation).apply {
+    private val keySpec = SecretKeySpec(generalMixKey(), "AES")
+    private val ivSpec = IvParameterSpec(generalMixIv())
+    private val encryptCipher: Cipher
+        get() = Cipher.getInstance(transformation).apply {
             init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
         }
-        decryptCipher = Cipher.getInstance(transformation).apply {
+    private val decryptCipher: Cipher
+        get() = Cipher.getInstance(transformation).apply {
             init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
         }
-    }
 
     override fun generalSalt(): String {
         val length = Random.nextInt(15, 30)
@@ -92,7 +89,7 @@ open class MXAESSecret(private val key: String) : IMXSecret {
 
     override fun encrypt(key: String, value: String, salt: String): String? {
         val relBytes = try {
-            encryptCipher?.doFinal((salt + value + key).toByteArray()) ?: return null
+            encryptCipher.doFinal((salt + value + key).toByteArray()) ?: return null
         } catch (e: Exception) {
             return null
         }
@@ -102,7 +99,7 @@ open class MXAESSecret(private val key: String) : IMXSecret {
 
     override fun decrypt(key: String, secretValue: String, salt: String): String? {
         val bytes = try {
-            decryptCipher?.doFinal(Base64.decode(secretValue, Base64.DEFAULT)) ?: return null
+            decryptCipher.doFinal(Base64.decode(secretValue, Base64.DEFAULT)) ?: return null
         } catch (e: Exception) {
             return null
         }

@@ -27,8 +27,8 @@ class MultThreadTestActivity : AppCompatActivity() {
     }
 
     private fun getSetUnit(index: Int, count: Int) {
-        val key = "key_index_" + index + "_" + count
-        val value = "value_index_" + index + "_" + count
+        val key = "key_index_" + index + "_" + count + "_" + Random.nextLong()
+        val value = "value_index_" + index + "_" + count + "_" + Random.nextLong()
         if (!SPUtils.set(key, value)) {
             println("写入错误：$key -> $value")
         }

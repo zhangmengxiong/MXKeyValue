@@ -16,22 +16,28 @@ class MXKeyValue private constructor(private val context: Context, private val s
         }
     }
 
-    class MXKVBuilder {
+    class Builder(private val context: Context, private val name: String) {
         private var crypt: IKVCrypt? = null
         private var store: IKVStore? = null
 
-        fun setCrypt(crypt: IKVCrypt): MXKVBuilder {
+        /**
+         * 加密类，默认=KVNoCrypt()
+         */
+        fun setCrypt(crypt: IKVCrypt): Builder {
             this.crypt = crypt
             return this
         }
 
-        fun setStore(store: IKVStore): MXKVBuilder {
+        /**
+         * 存储方式，默认=KVSqliteStore()
+         */
+        fun setStore(store: IKVStore): Builder {
             this.store = store
             return this
         }
 
         @Throws(exceptionClasses = [Exception::class])
-        fun build(context: Context, name: String): MXKeyValue {
+        fun build(): MXKeyValue {
             val crypt = crypt ?: KVNoCrypt()
             if (!KVUtils.validate(crypt)) {// 验证crypt 工具类解密正确性
                 throw Exception("${crypt::class.java.simpleName}  --->  IMXSecret Class validate error.")

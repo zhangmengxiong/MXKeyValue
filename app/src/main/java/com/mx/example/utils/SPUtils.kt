@@ -11,7 +11,7 @@ import com.mx.keyvalue.store.sqlite.KVSqliteStore
 // 缓存类
 object SPUtils {
     val KV by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXKeyValue.MXKVBuilder()
+        MXKeyValue.Builder()
             .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
             .setStore(KVSqliteStore())
             .build(MyApp.appContext, "kvdb_kv_v1")

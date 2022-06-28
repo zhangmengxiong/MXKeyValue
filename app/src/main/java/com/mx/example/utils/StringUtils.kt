@@ -1,6 +1,5 @@
 package com.mx.example.utils
 
-import java.lang.StringBuilder
 import java.security.MessageDigest
 import java.util.*
 

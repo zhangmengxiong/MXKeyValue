@@ -1,5 +1,5 @@
 package com.mx.keyvalue.utils
 
-interface MXKVObserver {
+interface KVObserver {
     fun onChange(key: String, value: String?)
 }

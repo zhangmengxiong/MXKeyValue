@@ -1,36 +1,50 @@
 package com.mx.keyvalue
 
 import android.content.Context
-import com.mx.keyvalue.secret.IMXCrypt
-import com.mx.keyvalue.secret.MXNoCrypt
+import com.mx.keyvalue.crypt.IKVCrypt
+import com.mx.keyvalue.crypt.KVNoCrypt
 import com.mx.keyvalue.store.IKVStore
-import com.mx.keyvalue.store.sqlite.MXSqliteStore
-import com.mx.keyvalue.utils.MXKVObservable
-import com.mx.keyvalue.utils.MXKVObserver
-import com.mx.keyvalue.utils.MXUtils
+import com.mx.keyvalue.store.sqlite.KVSqliteStore
+import com.mx.keyvalue.utils.KVObservable
+import com.mx.keyvalue.utils.KVObserver
+import com.mx.keyvalue.utils.KVUtils
 
-class MXKeyValue(
-    private val context: Context,
-    private val name: String,
-    private val crypt: IMXCrypt = MXNoCrypt()
-) {
+class MXKeyValue private constructor(private val context: Context, private val store: IKVStore) {
     companion object {
         fun setDebug(debug: Boolean) {
-            MXUtils.setDebug(debug)
+            KVUtils.setDebug(debug)
         }
     }
 
-    private val observerSet = HashMap<String, MXKVObservable>()
-    private val ikvStore: IKVStore by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXSqliteStore(context.applicationContext, name.trim(), crypt)
-    }
+    class MXKVBuilder {
+        private var crypt: IKVCrypt? = null
+        private var store: IKVStore? = null
 
-    init {
-        if (!crypt.validate()) {
-            // 验证Secret 工具类解密正确性
-            throw Exception("${crypt::class.java.simpleName}  --->  IMXSecret Class validate error.")
+        fun setCrypt(crypt: IKVCrypt): MXKVBuilder {
+            this.crypt = crypt
+            return this
+        }
+
+        fun setStore(store: IKVStore): MXKVBuilder {
+            this.store = store
+            return this
+        }
+
+        @Throws(exceptionClasses = [Exception::class])
+        fun build(context: Context, name: String): MXKeyValue {
+            val crypt = crypt ?: KVNoCrypt()
+            if (!KVUtils.validate(crypt)) {// 验证crypt 工具类解密正确性
+                throw Exception("${crypt::class.java.simpleName}  --->  IMXSecret Class validate error.")
+            }
+
+            val store = store ?: KVSqliteStore()
+            store.create(context, name, crypt)
+
+            return MXKeyValue(context, store)
         }
     }
+
+    private val observerSet = HashMap<String, KVObservable>()
 
     /**
      * 从SharedPreferences拷贝数据
@@ -40,7 +54,7 @@ class MXKeyValue(
         for (entry in sp.all) {
             val value = entry.value?.toString()
             if (value != null) {
-                ikvStore.set(entry.key, value, null)
+                store.set(entry.key, value, null)
             }
         }
     }
@@ -52,9 +66,9 @@ class MXKeyValue(
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
         val result = if (value != null && value.isNotEmpty()) {
-            ikvStore.set(key_trim, value, expire_time)
+            store.set(key_trim, value, expire_time)
         } else {
-            ikvStore.delete(key_trim)
+            store.delete(key_trim)
         }
         observerSet[key]?.set(value)
         return result
@@ -66,7 +80,7 @@ class MXKeyValue(
     fun get(key: String, default: String? = null): String? {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return default
-        return ikvStore.get(key_trim) ?: default
+        return store.get(key_trim) ?: default
     }
 
     /**
@@ -75,45 +89,45 @@ class MXKeyValue(
     fun delete(key: String): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
-        val result = ikvStore.delete(key_trim)
+        val result = store.delete(key_trim)
         observerSet[key]?.set(null)
         return result
     }
 
     fun getAll(): Map<String, String> {
-        return ikvStore.getAll()
+        return store.getAll()
     }
 
     /**
      * 清理过期KV
      */
     fun cleanExpire() {
-        ikvStore.cleanExpire()
+        store.cleanExpire()
     }
 
     /**
      * 清理数据
      */
     fun cleanAll(): Boolean {
-        return ikvStore.cleanAll()
+        return store.cleanAll()
     }
 
-    fun addKeyObserver(key: String, observer: MXKVObserver) {
+    fun addKeyObserver(key: String, observer: KVObserver) {
         var observable = observerSet[key]
         if (observable == null) {
-            observable = MXKVObservable(key, get(key))
+            observable = KVObservable(key, get(key))
             observerSet[key] = observable
         }
         observable.addObserver(observer)
     }
 
-    fun removeKeyObserver(key: String, observer: MXKVObserver) {
+    fun removeKeyObserver(key: String, observer: KVObserver) {
         val observable = observerSet[key] ?: return
         observable.deleteObserver(observer)
     }
 
     fun release() {
         observerSet.clear()
-        ikvStore.release()
+        store.release()
     }
 }

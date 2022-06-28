@@ -18,43 +18,43 @@ class DelegateTestActivity : AppCompatActivity() {
         setContentView(R.layout.activity_delegate_test)
 
         testBtn.setOnClickListener {
-            var boolDelegate by MXBoolDelegate(SPUtils.KV, "bool_test", true)
+            var boolDelegate by KVBoolDelegate(SPUtils.KV, "bool_test", true)
             println("测试 MXBoolDelegate -> $boolDelegate")
             boolDelegate = false
             println("测试 MXBoolDelegate -> $boolDelegate")
 
 
-            var doubleDelegate by MXDoubleDelegate(SPUtils.KV, "double_test", 1.0)
+            var doubleDelegate by KVDoubleDelegate(SPUtils.KV, "double_test", 1.0)
             println("测试 MXDoubleDelegate -> $doubleDelegate")
             doubleDelegate = 2.0
             println("测试 MXDoubleDelegate -> $doubleDelegate")
 
 
-            var floatDelegate by MXFloatDelegate(SPUtils.KV, "float_test", 1f)
+            var floatDelegate by KVFloatDelegate(SPUtils.KV, "float_test", 1f)
             println("测试 MXFloatDelegate -> $floatDelegate")
             floatDelegate = 2f
             println("测试 MXFloatDelegate -> $floatDelegate")
 
 
-            var intDelegate by MXIntDelegate(SPUtils.KV, "int_test", 1)
+            var intDelegate by KVIntDelegate(SPUtils.KV, "int_test", 1)
             println("测试 MXIntDelegate -> $intDelegate")
             intDelegate = 2
             println("测试 MXIntDelegate -> $intDelegate")
 
 
-            var longDelegate by MXLongDelegate(SPUtils.KV, "long_test", 1)
+            var longDelegate by KVLongDelegate(SPUtils.KV, "long_test", 1)
             println("测试 MXLongDelegate -> $longDelegate")
             longDelegate = 2
             println("测试 MXLongDelegate -> $longDelegate")
 
 
-            var stringDelegate by MXStringDelegate(SPUtils.KV, "string_test", "testdef")
+            var stringDelegate by KVStringDelegate(SPUtils.KV, "string_test", "testdef")
             println("测试 MXStringDelegate -> $stringDelegate")
             stringDelegate = "2"
             println("测试 MXStringDelegate -> $stringDelegate")
 
 
-            var beanDelegate by MXBeanDelegate(
+            var beanDelegate by KVBeanDelegate(
                 SPUtils.KV,
                 TestBean::class.java,
                 "bean_test",
@@ -70,12 +70,12 @@ class DelegateTestActivity : AppCompatActivity() {
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class TestBean constructor(val id: String, val name: String)
 
-    class MXBeanDelegate<T>(
+    class KVBeanDelegate<T>(
         kv: MXKeyValue,
         private val clazz: Class<out T>,
         name: String,
         default: T
-    ) : MXBaseDelegate<T>(kv, name, default) {
+    ) : KVBaseDelegate<T>(kv, name, default) {
         override fun stringToObject(value: String): T {
             try {
                 val mapper = ObjectMapper()

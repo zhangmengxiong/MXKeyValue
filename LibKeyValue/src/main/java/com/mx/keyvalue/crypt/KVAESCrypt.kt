@@ -1,7 +1,7 @@
-package com.mx.keyvalue.secret
+package com.mx.keyvalue.crypt
 
 import android.util.Base64
-import com.mx.keyvalue.utils.MXUtils
+import com.mx.keyvalue.utils.KVUtils
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -12,7 +12,7 @@ import kotlin.random.Random
  * AES对称加密
  * @param key 加密用的Key
  */
-open class MXAESCrypt(private val key: String) : IMXCrypt {
+open class KVAESCrypt(private val key: String) : IKVCrypt {
     companion object {
         private val salt_key = arrayOf(
             65, 110, 123, 56, 3, 115, 73, 29, 108, 117, 98, 47, 93, 10, 71,
@@ -54,7 +54,7 @@ open class MXAESCrypt(private val key: String) : IMXCrypt {
             keys.append(source[i % source.size])
         }
         keys.append(list)
-        return MXUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
+        return KVUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
     }
 
     private fun generalMixIv(): ByteArray {
@@ -67,7 +67,7 @@ open class MXAESCrypt(private val key: String) : IMXCrypt {
             keys.append(source[i % source.size])
         }
         keys.append(list)
-        return MXUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
+        return KVUtils.md5(keys.toString().toByteArray(), 16).toByteArray()
     }
 
     private val keySpec = SecretKeySpec(generalMixKey(), "AES")
@@ -82,7 +82,7 @@ open class MXAESCrypt(private val key: String) : IMXCrypt {
         }
 
     override fun generalSalt(): String {
-        val length = Random.nextInt(15, 30)
+        val length = Random.nextInt(25, 30)
         return UUID.randomUUID().toString().replace("-", "").substring(0, length)
     }
 

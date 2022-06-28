@@ -2,8 +2,8 @@ package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
 
-open class MXBoolDelegate(kv: MXKeyValue, name: String, default: Boolean = false) :
-    MXBaseDelegate<Boolean>(kv, name, default) {
+open class KVBoolDelegate(kv: MXKeyValue, key: String, default: Boolean = false) :
+    KVBaseDelegate<Boolean>(kv, key, default) {
     override fun stringToObject(value: String): Boolean {
         return value.toBoolean()
     }

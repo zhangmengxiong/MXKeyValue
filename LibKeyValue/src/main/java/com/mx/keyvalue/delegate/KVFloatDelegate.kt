@@ -2,8 +2,8 @@ package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
 
-open class MXFloatDelegate(kv: MXKeyValue, name: String, default: Float = 0f) :
-    MXBaseDelegate<Float>(kv, name, default) {
+open class KVFloatDelegate(kv: MXKeyValue, key: String, default: Float = 0f) :
+    KVBaseDelegate<Float>(kv, key, default) {
     override fun stringToObject(value: String): Float {
         return value.toFloatOrNull() ?: default
     }

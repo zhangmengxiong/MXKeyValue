@@ -2,19 +2,18 @@
 ## 介绍
 基于Sqlite的，支持加密、自定义加密方式的KV数据库
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXKeyValue.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXKeyValue)
-库引用： 替换1.0.9 为最新版本
+库引用： 替换1.1.1 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.0.9'
+    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.1.1'
 ```
 
 ## 使用方法
 
 ```kotlin
-val KV = MXKeyValue(
-    application, // context
-    name = "mx_kv_test", // 存储数据库名称
-    secret = MXNoCrypt() // 加密方式
-)
+val KV = MXKeyValue.MXKVBuilder()
+         .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
+         .setStore(KVSqliteStore())
+         .build(MyApp.appContext, "kvdb_kv_v1")
 
 // 清理所有KV
 KV.cleanAll()
@@ -46,18 +45,18 @@ KV.cloneFromSharedPreferences("sp_name")
 
 ## 加密相关
 MXKeyValue内置两种加密方式：
-- MXNoCrypt()
-- MXAESCrypt("加密字符")
+- KVNoCrypt()
+- KVAESCrypt("加密字符")
 
 ### MXNoSecret
-MXNoCrypt = 不加密，存储Value=设置的Value
+KVNoCrypt = 不加密，存储Value=设置的Value
 
 ### MXAESSecret
-MXAESCrypt = AES对称加密
+KVAESCrypt = AES对称加密
 - 存储的value=encrypt(设置的Value)
 - 读取的Value=decrypt(存储的Value)
 
-注意：MXAESSecret初始化的加密字符在app上线后不能修改，否则会导致数据读取错误！
+注意：KVAESCrypt初始化的加密字符在app上线后不能修改，否则会导致数据读取错误！
 
 ### 自定义加密方式
 - 需要实现IMXCrypt接口
@@ -65,7 +64,7 @@ MXAESCrypt = AES对称加密
 - encrypt方法 = 源数据Value->存储Value
 - decrypt方法 = 存储Value->源数据Value
 ```kotlin
-class MyCrypt : IMXCrypt {
+class MyCrypt : IKVCrypt {
     private val divider = "$$$$$$$$$$$$"
     override fun generalSalt(): String {
         return UUID.randomUUID().toString().replace("-", "")
@@ -82,9 +81,8 @@ class MyCrypt : IMXCrypt {
 ```
 使用方法：
 ```kotlin
-val KV = MXKeyValue(
-    application,
-    name = "mx_kv_test",
-    secret = MyCrypt() // 加密方式
-)
+val KV = MXKeyValue.MXKVBuilder()
+         .setCrypt(MyCrypt())
+         .setStore(KVSqliteStore())
+         .build(MyApp.appContext, "kvdb_kv_v1")
 ```

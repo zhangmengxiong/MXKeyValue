@@ -4,14 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.mx.example.MyApp
 import com.mx.keyvalue.MXKeyValue
-import com.mx.keyvalue.delegate.MXBaseDelegate
-import com.mx.keyvalue.secret.MXAESCrypt
+import com.mx.keyvalue.crypt.KVAESCrypt
+import com.mx.keyvalue.delegate.KVBaseDelegate
+import com.mx.keyvalue.store.sqlite.KVSqliteStore
 
 // 缓存类
 object SPUtils {
     val KV by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXKeyValue(MyApp.appContext, "kvdb_kv_v1", MXAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
+        MXKeyValue.MXKVBuilder()
+            .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
+            .setStore(KVSqliteStore())
+            .build(MyApp.appContext, "kvdb_kv_v1")
     }
+
     fun get(key: String, def: String? = null): String? {
         return KV.get(key, def)
     }
@@ -28,12 +33,12 @@ object SPUtils {
         return KV.delete(key)
     }
 
-    class MXBeanDelegate<T>(
+    class KVBeanDelegate<T>(
         kv: MXKeyValue,
         private val clazz: Class<out T>,
         name: String,
         default: T?
-    ) : MXBaseDelegate<T?>(kv, name, default) {
+    ) : KVBaseDelegate<T?>(kv, name, default) {
         override fun stringToObject(value: String): T? {
             try {
                 val mapper = ObjectMapper()

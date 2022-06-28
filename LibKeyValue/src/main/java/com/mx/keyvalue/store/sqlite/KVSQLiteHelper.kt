@@ -4,8 +4,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-internal class MXSQLiteHelper(context: Context, dbName: String) :
-    SQLiteOpenHelper(context, dbName, null, 4) {
+internal class KVSQLiteHelper(context: Context, dbName: String) :
+    SQLiteOpenHelper(context.applicationContext, dbName, null, 4) {
     companion object {
         const val DB_KEY_NAME = "kv_name"
         const val DB_KEY_VALUE = "kv_value"

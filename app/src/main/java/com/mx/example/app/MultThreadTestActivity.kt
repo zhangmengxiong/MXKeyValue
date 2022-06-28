@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.example.R
 import com.mx.example.utils.SPUtils
-import com.mx.example.utils.StringUtils
 import kotlinx.android.synthetic.main.activity_mult_thread_test.*
 import kotlin.concurrent.thread
 import kotlin.random.Random

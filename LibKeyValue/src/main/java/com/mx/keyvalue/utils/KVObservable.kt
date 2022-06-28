@@ -3,10 +3,10 @@ package com.mx.keyvalue.utils
 import android.os.Handler
 import android.os.Looper
 
-internal class MXKVObservable(val key: String, defaultValue: String?) {
+internal class KVObservable(val key: String, defaultValue: String?) {
     private val mHandler = Handler(Looper.getMainLooper())
     private val lock = Object()
-    private val observerList = HashSet<MXKVObserver>()
+    private val observerList = HashSet<KVObserver>()
 
     private var _value: String? = defaultValue
 
@@ -30,7 +30,7 @@ internal class MXKVObservable(val key: String, defaultValue: String?) {
 
     fun get() = _value
 
-    fun addObserver(o: MXKVObserver?) {
+    fun addObserver(o: KVObserver?) {
         o ?: return
         synchronized(lock) {
             observerList.add(o)
@@ -38,7 +38,7 @@ internal class MXKVObservable(val key: String, defaultValue: String?) {
         mHandler.post { o.onChange(key, _value) }
     }
 
-    fun deleteObserver(o: MXKVObserver?) {
+    fun deleteObserver(o: KVObserver?) {
         o ?: return
         synchronized(lock) {
             observerList.remove(o)

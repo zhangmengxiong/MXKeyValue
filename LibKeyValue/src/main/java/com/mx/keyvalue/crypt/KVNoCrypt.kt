@@ -1,9 +1,9 @@
-package com.mx.keyvalue.secret
+package com.mx.keyvalue.crypt
 
 /**
  * 不加密
  */
-open class MXNoCrypt : IMXCrypt {
+open class KVNoCrypt : IKVCrypt {
     override fun generalSalt(): String {
         return ""
     }

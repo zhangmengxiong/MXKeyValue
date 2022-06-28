@@ -2,8 +2,8 @@ package com.mx.keyvalue.delegate
 
 import com.mx.keyvalue.MXKeyValue
 
-open class MXIntDelegate(kv: MXKeyValue, name: String, default: Int = 0) :
-    MXBaseDelegate<Int>(kv, name, default) {
+open class KVIntDelegate(kv: MXKeyValue, key: String, default: Int = 0) :
+    KVBaseDelegate<Int>(kv, key, default) {
     override fun stringToObject(value: String): Int {
         return value.toIntOrNull() ?: default
     }

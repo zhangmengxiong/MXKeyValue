@@ -2,18 +2,18 @@
 ## 介绍
 基于Sqlite的，支持加密、自定义加密方式的KV数据库
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXKeyValue.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXKeyValue)
-库引用： 替换1.1.1 为最新版本
+库引用： 替换1.1.3 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.1.1'
+    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.1.3'
 ```
 
 ## 使用方法
 
 ```kotlin
-val KV = MXKeyValue.MXKVBuilder()
-         .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
-         .setStore(KVSqliteStore())
-         .build(MyApp.appContext, "kvdb_kv_v1")
+val KV = MXKeyValue.Builder(MyApp.appContext, "kvdb_kv_v1")
+             .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
+             .setStore(KVSqliteStore())
+             .build()
 
 // 清理所有KV
 KV.cleanAll()
@@ -81,8 +81,8 @@ class MyCrypt : IKVCrypt {
 ```
 使用方法：
 ```kotlin
-val KV = MXKeyValue.MXKVBuilder()
-         .setCrypt(MyCrypt())
-         .setStore(KVSqliteStore())
-         .build(MyApp.appContext, "kvdb_kv_v1")
+val KV = MXKeyValue.Builder(MyApp.appContext, "kvdb_kv_v1")
+             .setCrypt(MyCrypt())
+             .setStore(KVSqliteStore())
+             .build()
 ```

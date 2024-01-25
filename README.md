@@ -4,7 +4,7 @@
 [![](https://jitpack.io/v/com.gitee.zhangmengxiong/MXKeyValue.svg)](https://jitpack.io/#com.gitee.zhangmengxiong/MXKeyValue)
 库引用： 替换1.1.3 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.1.3'
+    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.2.0'
 ```
 
 ## 使用方法

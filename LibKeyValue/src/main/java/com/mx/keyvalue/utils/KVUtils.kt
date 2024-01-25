@@ -1,12 +1,11 @@
 package com.mx.keyvalue.utils
 
-import com.mx.keyvalue.BuildConfig
 import com.mx.keyvalue.crypt.IKVCrypt
 import java.security.MessageDigest
 import java.util.*
 
 internal object KVUtils {
-    private var debug = BuildConfig.DEBUG
+    private var debug = false
     fun setDebug(debug: Boolean) {
         this.debug = debug
     }

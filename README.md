@@ -3,9 +3,9 @@
 基于Sqlite的，支持加密、自定义加密方式的KV数据库
 [![](https://jitpack.io/v/zhangmengxiong/MXKeyValue.svg)](https://jitpack.io/#zhangmengxiong/MXKeyValue)
 
-库引用： 替换1.2.1 为最新版本
+库引用： 替换1.2.2 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.2.1'
+    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.2.2'
 ```
 
 ## 使用方法

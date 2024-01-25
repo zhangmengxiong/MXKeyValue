@@ -71,7 +71,7 @@ class MXKeyValue private constructor(private val context: Context, private val s
     fun set(key: String, value: String?, expire_time: Long? = null): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
-        val result = if (value != null && value.isNotEmpty()) {
+        val result = if (!value.isNullOrEmpty()) {
             store.set(key_trim, value, expire_time)
         } else {
             store.delete(key_trim)

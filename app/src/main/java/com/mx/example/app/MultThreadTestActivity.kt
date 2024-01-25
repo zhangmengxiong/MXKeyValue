@@ -2,17 +2,17 @@ package com.mx.example.app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mx.example.R
+import com.mx.example.databinding.ActivityMultThreadTestBinding
 import com.mx.example.utils.SPUtils
-import kotlinx.android.synthetic.main.activity_mult_thread_test.*
 import kotlin.concurrent.thread
 import kotlin.random.Random
 
 class MultThreadTestActivity : AppCompatActivity() {
+    private val binding by lazy { ActivityMultThreadTestBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mult_thread_test)
-        syncTestTxv.setOnClickListener {
+        setContentView(binding.root)
+        binding.syncTestTxv.setOnClickListener {
             repeat(5) { index ->
                 thread {
                     repeat(100000) { count ->

@@ -5,19 +5,25 @@ import androidx.appcompat.app.AppCompatActivity
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.mx.example.R
+import com.mx.example.databinding.ActivityDelegateTestBinding
 import com.mx.example.utils.SPUtils
 import com.mx.keyvalue.MXKeyValue
-import com.mx.keyvalue.delegate.*
-import kotlinx.android.synthetic.main.activity_delegate_test.*
+import com.mx.keyvalue.delegate.KVBaseDelegate
+import com.mx.keyvalue.delegate.KVBoolDelegate
+import com.mx.keyvalue.delegate.KVDoubleDelegate
+import com.mx.keyvalue.delegate.KVFloatDelegate
+import com.mx.keyvalue.delegate.KVIntDelegate
+import com.mx.keyvalue.delegate.KVLongDelegate
+import com.mx.keyvalue.delegate.KVStringDelegate
 
 class DelegateTestActivity : AppCompatActivity() {
 
+    private val binding by lazy { ActivityDelegateTestBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_delegate_test)
+        setContentView(binding.root)
 
-        testBtn.setOnClickListener {
+        binding.testBtn.setOnClickListener {
             var boolDelegate by KVBoolDelegate(SPUtils.KV, "bool_test", true)
             println("测试 MXBoolDelegate -> $boolDelegate")
             boolDelegate = false

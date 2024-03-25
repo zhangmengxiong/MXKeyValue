@@ -5,9 +5,10 @@ import com.mx.keyvalue.crypt.IKVCrypt
 import com.mx.keyvalue.crypt.KVNoCrypt
 import com.mx.keyvalue.store.IKVStore
 import com.mx.keyvalue.store.sqlite.KVSqliteStore
-import com.mx.keyvalue.utils.KVObservable
-import com.mx.keyvalue.utils.KVObserver
 import com.mx.keyvalue.utils.KVUtils
+import com.mx.keyvalue.utils.KeyFilter
+import com.mx.keyvalue.utils.MXPosition
+import kotlin.concurrent.thread
 
 class MXKeyValue private constructor(private val context: Context, private val store: IKVStore) {
     companion object {
@@ -50,7 +51,9 @@ class MXKeyValue private constructor(private val context: Context, private val s
         }
     }
 
-    private val observerSet = HashMap<String, KVObservable>()
+    init {
+        thread { store.cleanExpire() }
+    }
 
     /**
      * 从SharedPreferences拷贝数据
@@ -76,7 +79,6 @@ class MXKeyValue private constructor(private val context: Context, private val s
         } else {
             store.delete(key_trim)
         }
-        observerSet[key]?.set(value)
         return result
     }
 
@@ -96,7 +98,13 @@ class MXKeyValue private constructor(private val context: Context, private val s
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
         val result = store.delete(key_trim)
-        observerSet[key]?.set(null)
+        return result
+    }
+
+    fun deleteFilter(key: String, position: MXPosition): Boolean {
+        val key_trim = key.trim()
+        if (key_trim.isBlank()) return false
+        val result = store.deleteFilter(KeyFilter(key, position))
         return result
     }
 
@@ -118,22 +126,7 @@ class MXKeyValue private constructor(private val context: Context, private val s
         return store.cleanAll()
     }
 
-    fun addKeyObserver(key: String, observer: KVObserver) {
-        var observable = observerSet[key]
-        if (observable == null) {
-            observable = KVObservable(key, get(key))
-            observerSet[key] = observable
-        }
-        observable.addObserver(observer)
-    }
-
-    fun removeKeyObserver(key: String, observer: KVObserver) {
-        val observable = observerSet[key] ?: return
-        observable.deleteObserver(observer)
-    }
-
     fun release() {
-        observerSet.clear()
         store.release()
     }
 }

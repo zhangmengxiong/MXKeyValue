@@ -2,6 +2,7 @@ package com.mx.keyvalue.store
 
 import android.content.Context
 import com.mx.keyvalue.crypt.IKVCrypt
+import com.mx.keyvalue.utils.KeyFilter
 
 interface IKVStore {
     /**
@@ -30,6 +31,12 @@ interface IKVStore {
      * @param key 键
      */
     fun delete(key: String): Boolean
+
+    /**
+     * 删除所有匹配的键值对
+     * @param key 键
+     */
+    fun deleteFilter(key: KeyFilter): Boolean
 
     /**
      * 获取所有键值对

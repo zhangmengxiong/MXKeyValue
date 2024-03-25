@@ -22,6 +22,7 @@
         <activity android:name=".app.ExpireTestActivity" />
         <activity android:name=".app.MultThreadTestActivity" />
         <activity android:name=".app.DelegateTestActivity" />
+        <activity android:name=".app.KeyFilterTestActivity" />
     </application>
 
 </manifest>

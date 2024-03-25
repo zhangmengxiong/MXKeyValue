@@ -20,5 +20,8 @@ class MainActivity : AppCompatActivity() {
         binding.delegateTestTxv.setOnClickListener {
             startActivity(Intent(this, DelegateTestActivity::class.java))
         }
+        binding.keyFilterTestTxv.setOnClickListener {
+            startActivity(Intent(this, KeyFilterTestActivity::class.java))
+        }
     }
 }

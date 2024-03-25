@@ -9,6 +9,8 @@ import com.mx.keyvalue.crypt.IKVCrypt
 import com.mx.keyvalue.crypt.KVNoCrypt
 import com.mx.keyvalue.store.IKVStore
 import com.mx.keyvalue.utils.KVUtils
+import com.mx.keyvalue.utils.KeyFilter
+import com.mx.keyvalue.utils.MXPosition
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
@@ -116,6 +118,34 @@ class KVSqliteStore : IKVStore {
                     name,
                     "${KVSQLiteHelper.DB_KEY_NAME}=?",
                     arrayOf(key)
+                ) > 0
+                database.setTransactionSuccessful()
+                return result
+            } catch (e: Exception) {
+                e.printStackTrace()
+                KVUtils.log("delete错误 -> $key -- ${e.message}")
+            } finally {
+                database.endTransaction()
+            }
+        }
+        return false
+    }
+
+    override fun deleteFilter(key: KeyFilter): Boolean {
+        lock.write {
+            val key_filter = when (key.position) {
+                MXPosition.START -> "${key.filter}%"
+                MXPosition.END -> "%${key.filter}"
+                MXPosition.ANY -> "%${key.filter}%"
+            }
+
+            val database = getDatabase()
+            try {
+                database.beginTransaction()
+                val result = database.delete(
+                    name,
+                    "${KVSQLiteHelper.DB_KEY_NAME} like ?",
+                    arrayOf(key_filter)
                 ) > 0
                 database.setTransactionSuccessful()
                 return result

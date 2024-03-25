@@ -7,6 +7,7 @@ import com.mx.keyvalue.MXKeyValue
 import com.mx.keyvalue.crypt.KVAESCrypt
 import com.mx.keyvalue.delegate.KVBaseDelegate
 import com.mx.keyvalue.store.sqlite.KVSqliteStore
+import com.mx.keyvalue.utils.MXPosition
 
 // 缓存类
 object SPUtils {
@@ -31,6 +32,10 @@ object SPUtils {
 
     fun delete(key: String): Boolean {
         return KV.delete(key)
+    }
+
+    fun deleteFilter(key: String, position: MXPosition): Boolean {
+        return KV.deleteFilter(key, position)
     }
 
     class KVBeanDelegate<T>(

@@ -3,18 +3,18 @@
 基于Sqlite的，支持加密、自定义加密方式的KV数据库
 [![](https://jitpack.io/v/zhangmengxiong/MXKeyValue.svg)](https://jitpack.io/#zhangmengxiong/MXKeyValue)
 
-库引用： 替换1.2.2 为最新版本
+库引用： 替换1.3.1 为最新版本
 ```gradle
-    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.2.2'
+    implementation 'com.gitee.zhangmengxiong:MXKeyValue:1.3.1'
 ```
 
 ## 使用方法
 
 ```kotlin
-val KV = MXKeyValue.Builder(MyApp.appContext, "kvdb_kv_v1")
+val KV = MXKeyValue.Builder("kvdb_kv_v1")
              .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
              .setStore(KVSqliteStore())
-             .build()
+             .build(MyApp.appContext)
 
 // 清理所有KV
 KV.cleanAll()
@@ -29,7 +29,7 @@ KV.cleanExpire()
 KV.set(key, value)
 
 // 设置KV的有效期 1分钟 后失效
-KV.set(key, value, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1))
+KV.set(key, value, 1.toDuration(DurationUnit.MINUTES))
 
 // 获取Value
 KV.get("test_expire_key")

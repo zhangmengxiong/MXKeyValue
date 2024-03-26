@@ -5,7 +5,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mx.example.databinding.ActivityExpireTestBinding
 import com.mx.example.utils.SPUtils
-import java.util.concurrent.TimeUnit
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class ExpireTestActivity : AppCompatActivity() {
     private val binding by lazy { ActivityExpireTestBinding.inflate(layoutInflater) }
@@ -18,7 +19,7 @@ class ExpireTestActivity : AppCompatActivity() {
             SPUtils.set(
                 "test_expire_key",
                 "1分钟失效:" + System.currentTimeMillis(),
-                System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)
+                1.toDuration(DurationUnit.MINUTES)
             )
             Toast.makeText(this, SPUtils.get("test_expire_key", "失效"), Toast.LENGTH_SHORT).show()
         }

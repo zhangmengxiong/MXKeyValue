@@ -22,9 +22,9 @@ interface IKVStore {
      * 设置Value
      * @param key 键
      * @param value 值
-     * @param dead_time 过期时间，超过这个时间后读取Key会返回 NULL
+     * @param dead_time 过期时间，超过这个时间后读取Key会返回 NULL，传值0或null不会检测这个值
      */
-    fun set(key: String, value: String, dead_time: Long?): Boolean
+    fun set(key: String, value: String, dead_time: Long): Boolean
 
     /**
      * 删除键值对

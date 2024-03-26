@@ -82,7 +82,7 @@ class KVSqliteStore : IKVStore {
         return null
     }
 
-    override fun set(key: String, value: String, dead_time: Long?): Boolean {
+    override fun set(key: String, value: String, dead_time: Long): Boolean {
         lock.write {
             val database = getDatabase()
             try {
@@ -95,7 +95,7 @@ class KVSqliteStore : IKVStore {
                 values.put(KVSQLiteHelper.DB_KEY_VALUE, value_encrypt)
                 values.put(KVSQLiteHelper.DB_KEY_SALT, salt)
                 values.put(KVSQLiteHelper.DB_KEY_UPDATE_TIME, System.currentTimeMillis())
-                values.put(KVSQLiteHelper.DB_KEY_DEAD_TIME, dead_time ?: 0L)
+                values.put(KVSQLiteHelper.DB_KEY_DEAD_TIME, dead_time)
                 val result = database.replace(name, null, values) >= 0
                 database.setTransactionSuccessful()
                 return result

@@ -2,7 +2,7 @@ package com.mx.keyvalue.crypt
 
 import android.util.Base64
 import com.mx.keyvalue.utils.KVUtils
-import java.util.*
+import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec

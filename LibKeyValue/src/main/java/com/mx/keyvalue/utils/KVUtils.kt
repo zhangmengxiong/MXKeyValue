@@ -2,7 +2,7 @@ package com.mx.keyvalue.utils
 
 import com.mx.keyvalue.crypt.IKVCrypt
 import java.security.MessageDigest
-import java.util.*
+import java.util.UUID
 
 internal object KVUtils {
     private var debug = false

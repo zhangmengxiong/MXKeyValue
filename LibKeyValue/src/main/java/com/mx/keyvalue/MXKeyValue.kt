@@ -9,15 +9,17 @@ import com.mx.keyvalue.utils.KVUtils
 import com.mx.keyvalue.utils.KeyFilter
 import com.mx.keyvalue.utils.MXPosition
 import kotlin.concurrent.thread
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
-class MXKeyValue private constructor(private val context: Context, private val store: IKVStore) {
+class MXKeyValue private constructor(private val store: IKVStore) {
     companion object {
         fun setDebug(debug: Boolean) {
             KVUtils.setDebug(debug)
         }
     }
 
-    class Builder(private val context: Context, private val name: String) {
+    class Builder(private val name: String) {
         private var crypt: IKVCrypt? = null
         private var store: IKVStore? = null
 
@@ -38,7 +40,7 @@ class MXKeyValue private constructor(private val context: Context, private val s
         }
 
         @Throws(exceptionClasses = [Exception::class])
-        fun build(): MXKeyValue {
+        fun build(context: Context): MXKeyValue {
             val crypt = crypt ?: KVNoCrypt()
             if (!KVUtils.validate(crypt)) {// 验证crypt 工具类解密正确性
                 throw Exception("${crypt::class.java.simpleName}  --->  IMXSecret Class validate error.")
@@ -47,7 +49,7 @@ class MXKeyValue private constructor(private val context: Context, private val s
             val store = store ?: KVSqliteStore()
             store.create(context, name, crypt)
 
-            return MXKeyValue(context, store)
+            return MXKeyValue(store)
         }
     }
 
@@ -58,24 +60,33 @@ class MXKeyValue private constructor(private val context: Context, private val s
     /**
      * 从SharedPreferences拷贝数据
      */
-    fun cloneFromSharedPreferences(name: String) {
+    fun cloneFromSharedPreferences(context: Context, name: String) {
         val sp = context.getSharedPreferences(name, Context.MODE_PRIVATE)
         for (entry in sp.all) {
             val value = entry.value?.toString()
             if (value != null) {
-                store.set(entry.key, value, null)
+                store.set(entry.key, value, 0)
             }
         }
     }
 
     /**
      * 设置KV
+     * @param key 键
+     * @param value 值
+     * @param duration 该值的有效期
      */
-    fun set(key: String, value: String?, expire_time: Long? = null): Boolean {
+    fun set(key: String, value: String?, duration: Duration? = null): Boolean {
         val key_trim = key.trim()
         if (key_trim.isBlank()) return false
+
+        val ms = duration?.toLong(DurationUnit.MILLISECONDS) ?: 0
+        val time = if (ms <= 0) 0 else {
+            System.currentTimeMillis() + ms
+        }
+
         val result = if (!value.isNullOrEmpty()) {
-            store.set(key_trim, value, expire_time)
+            store.set(key_trim, value, time)
         } else {
             store.delete(key_trim)
         }

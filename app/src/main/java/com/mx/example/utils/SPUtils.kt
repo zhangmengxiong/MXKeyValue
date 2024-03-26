@@ -8,22 +8,23 @@ import com.mx.keyvalue.crypt.KVAESCrypt
 import com.mx.keyvalue.delegate.KVBaseDelegate
 import com.mx.keyvalue.store.sqlite.KVSqliteStore
 import com.mx.keyvalue.utils.MXPosition
+import kotlin.time.Duration
 
 // 缓存类
 object SPUtils {
     val KV by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        MXKeyValue.Builder(MyApp.appContext, "kvdb_kv_v1")
+        MXKeyValue.Builder("kvdb_kv_v1")
             .setCrypt(KVAESCrypt("27e2125d0a11a9aa65b9c9773673bc2a"))
             .setStore(KVSqliteStore())
-            .build()
+            .build(MyApp.appContext)
     }
 
     fun get(key: String, def: String? = null): String? {
         return KV.get(key, def)
     }
 
-    fun set(key: String, value: String?, expire_time: Long? = null): Boolean {
-        return KV.set(key, value, expire_time)
+    fun set(key: String, value: String?, duration: Duration? = null): Boolean {
+        return KV.set(key, value, duration)
     }
 
     fun cleanAll() {
